@@ -129,7 +129,12 @@ function md(s){return s.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(
 
 // ── GEMINI ────────────────────────────────
 // ── API MODE: 'proxy' uses Vercel env vars (safe), 'direct' uses keys from UI ──
-const USE_PROXY = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1' && !window.location.hostname.includes('file');
+// PROXY DETECTION FIX:
+// file:// protocol → hostname is "" → local mode (direct API calls)
+// localhost / 127.0.0.1 → local dev mode (direct API calls)
+// https:// on real domain → deployed on Vercel → use proxy (keys in env vars)
+const _h = window.location.hostname;
+const USE_PROXY = window.location.protocol === 'https:' && _h !== '' && _h !== 'localhost' && _h !== '127.0.0.1';
 
 async function gem(prompt,temp=0.7,maxTok=2048){
   const body={contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:{temperature:temp,maxOutputTokens:maxTok}};
