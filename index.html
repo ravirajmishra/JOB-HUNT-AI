@@ -3,122 +3,134 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>JobAI Pro - Intelligent Career Automation</title>
+<title>JobAI Pro - Intelligent Career Hub</title>
 <style>
-/* --- PREMIUM MODERN UI --- */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+/* --- APPLE-INSPIRED PREMIUM UI (White, Frosted Glass, Pill Nav) --- */
 :root {
-  --bg-main: #f4f7f9;
-  --surface: rgba(255, 255, 255, 0.9);
-  --surface-solid: #ffffff;
-  --primary: #4f46e5;
-  --primary-hover: #4338ca;
-  --primary-light: rgba(79, 70, 229, 0.1);
-  --text-main: #0f172a;
-  --text-muted: #64748b;
-  --border: rgba(203, 213, 225, 0.7);
-  --success: #10b981;
-  --success-bg: rgba(16, 185, 129, 0.1);
+  --bg-color: #fbfbfd;
+  --text-main: #1d1d1f;
+  --text-muted: #86868b;
+  --accent: #0071e3;
+  --accent-hover: #0077ed;
+  --glass-bg: rgba(255, 255, 255, 0.65);
+  --glass-border: rgba(255, 255, 255, 0.5);
+  --shadow-subtle: 0 4px 24px rgba(0, 0, 0, 0.04);
+  --shadow-float: 0 12px 48px rgba(0, 0, 0, 0.08);
+  --success: #34c759;
   --warning: #f59e0b;
-  --warning-bg: rgba(245, 158, 11, 0.1);
-  --danger: #ef4444;
-  --danger-bg: rgba(239, 68, 68, 0.1);
-  --shadow-sm: 0 2px 4px rgba(0,0,0,0.02);
-  --shadow-md: 0 8px 16px rgba(0,0,0,0.04);
-  --radius-sm: 8px; --radius-md: 12px; --radius-lg: 16px;
+  --danger: #ff3b30;
+  --radius-lg: 24px;
+  --radius-md: 14px;
+  --radius-pill: 9999px;
+  --font-stack: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
+
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-stack); }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
-  background: var(--bg-main);
-  background-image: radial-gradient(circle at 20% 40%, rgba(79, 70, 229, 0.05), transparent 40%), radial-gradient(circle at 80% 60%, rgba(16, 185, 129, 0.05), transparent 40%);
-  color: var(--text-main);
-  min-height: 100vh;
-  -webkit-font-smoothing: antialiased;
+  background-color: var(--bg-color); color: var(--text-main);
+  min-height: 100vh; overflow-x: hidden; -webkit-font-smoothing: antialiased;
+  background-image: 
+    radial-gradient(circle at 15% 30%, rgba(0, 113, 227, 0.04) 0%, transparent 40%),
+    radial-gradient(circle at 85% 70%, rgba(52, 199, 89, 0.04) 0%, transparent 40%);
+  padding-bottom: 100px; 
 }
 
-#app { max-width: 1200px; margin: 0 auto; padding: 24px; position: relative; z-index: 1; }
-#ml { position: relative; z-index: 100; }
+/* Floating Pill Navigation */
+.nav-container {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  z-index: 1000; padding: 8px; border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
+  border: 1px solid rgba(255, 255, 255, 0.4); box-shadow: var(--shadow-float);
+  display: flex; gap: 4px; align-items: center;
+}
 
+.nb {
+  padding: 12px 20px; border-radius: var(--radius-pill); border: none;
+  background: transparent; color: var(--text-muted); font-size: 14px; font-weight: 600;
+  cursor: pointer; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  display: flex; align-items: center; gap: 8px; letter-spacing: -0.01em;
+}
+
+.nb:hover:not(.on) { color: var(--text-main); background: rgba(0,0,0,0.03); }
+.nb.on { background: var(--text-main); color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+
+/* Main Content Area */
+#app { max-width: 1000px; margin: 0 auto; padding: 40px 24px; position: relative; z-index: 1; }
+#ml { position: relative; z-index: 1100; }
+
+/* Frosted Glass Cards */
 .card {
-  background: var(--surface); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-md);
-  transition: transform 0.2s, box-shadow 0.2s;
+  background: var(--glass-bg); backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px);
+  border: 1px solid var(--glass-border); border-radius: var(--radius-lg);
+  padding: 32px; box-shadow: var(--shadow-subtle); margin-bottom: 24px;
+  animation: fadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-h1, h2, h3 { color: var(--text-main); font-weight: 700; letter-spacing: -0.02em; margin-bottom: 0.5rem; }
-p { line-height: 1.6; }
+h1, h2, h3 { letter-spacing: -0.03em; font-weight: 700; margin-bottom: 8px; }
+p { color: var(--text-muted); line-height: 1.5; font-size: 15px; }
+.header-title { font-size: 36px; font-weight: 800; letter-spacing: -0.04em; }
 
+/* Buttons */
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-  padding: 10px 20px; border-radius: var(--radius-md); border: none;
-  font-size: 14px; font-weight: 600; cursor: pointer; transition: 0.2s; white-space: nowrap; text-decoration: none;
+  padding: 12px 24px; border-radius: var(--radius-pill); border: none;
+  font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; text-decoration: none;
 }
-.btn:active { transform: translateY(1px); }
-.btn:disabled { opacity: 0.6; cursor: not-allowed; }
-.bp { background: var(--primary); color: white; }
-.bp:hover:not(:disabled) { background: var(--primary-hover); }
-.bs { background: white; border: 1px solid var(--border); color: var(--text-main); }
-.bs:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); }
-.bg { background: var(--success); color: white; }
-.bg:hover:not(:disabled) { background: #059669; }
-.btn-sm { padding: 8px 14px; font-size: 13px; }
-.btn-xs { padding: 6px 12px; font-size: 12px; border-radius: var(--radius-sm); }
+.btn:active { transform: scale(0.97); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.bp { background: var(--accent); color: white; }
+.bp:hover:not(:disabled) { background: var(--accent-hover); box-shadow: 0 4px 14px rgba(0, 113, 227, 0.3); }
+.bs { background: rgba(0,0,0,0.05); color: var(--text-main); }
+.bs:hover:not(:disabled) { background: rgba(0,0,0,0.08); }
+.btn-sm { padding: 8px 16px; font-size: 13px; }
 
+/* Inputs */
 .inp {
-  width: 100%; padding: 12px 16px; border-radius: var(--radius-md);
-  border: 1px solid var(--border); background: var(--surface-solid);
-  font-size: 14px; color: var(--text-main); outline: none; transition: 0.2s;
+  width: 100%; padding: 14px 18px; border-radius: var(--radius-md);
+  border: 1px solid rgba(0,0,0,0.1); background: rgba(255,255,255,0.8);
+  font-size: 15px; color: var(--text-main); transition: 0.2s; outline: none;
 }
-.inp:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+.inp:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(0,113,227,0.15); background: #fff; }
 .ta { resize: vertical; line-height: 1.6; }
 
-.nav {
-  display: flex; gap: 4px; background: rgba(255,255,255,0.7);
-  backdrop-filter: blur(12px); border: 1px solid var(--border);
-  padding: 6px; border-radius: var(--radius-lg); margin-bottom: 24px; overflow-x: auto;
-}
-.nb {
-  display: flex; align-items: center; gap: 8px; padding: 10px 18px;
-  border-radius: var(--radius-md); border: none; background: transparent;
-  color: var(--text-muted); cursor: pointer; font-size: 14px; font-weight: 600; transition: 0.2s;
-}
-.nb:hover:not(.on) { background: rgba(255,255,255,0.9); color: var(--text-main); }
-.nb.on { background: var(--primary); color: white; box-shadow: var(--shadow-sm); }
+/* Grids */
+.g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.g3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+@media(max-width: 768px) { .g3, .g2 { grid-template-columns: 1fr; } }
 
-.chip { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 99px; font-size: 12px; font-weight: 600; }
-.cg { background: var(--success-bg); color: #065f46; }
-.ca { background: var(--warning-bg); color: #92400e; }
-.cp { background: var(--primary-light); color: var(--primary); }
+/* Badges & UI Elements */
+.chip { display: inline-flex; padding: 6px 14px; border-radius: var(--radius-pill); font-size: 13px; font-weight: 600; background: rgba(0,0,0,0.04); color: var(--text-main); }
+.chip.success { background: rgba(52, 199, 89, 0.1); color: #248a3d; }
+.chip.danger { background: rgba(255, 59, 48, 0.1); color: #c93400; }
 
+.stat-box { text-align: center; padding: 24px; background: rgba(255,255,255,0.5); border-radius: var(--radius-lg); border: 1px solid rgba(255,255,255,0.6); }
+.stat-val { font-size: 40px; font-weight: 800; letter-spacing: -0.05em; color: var(--text-main); }
+.stat-lbl { font-size: 13px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 4px; }
+
+/* Kanban / Tracker */
+.kanban { display: grid; grid-template-columns: repeat(4, minmax(200px, 1fr)); gap: 16px; overflow-x: auto; padding-bottom: 12px; }
+.kcol { background: rgba(0,0,0,0.02); border-radius: var(--radius-lg); padding: 16px; min-height: 300px; }
+.kc { background: #fff; border-radius: var(--radius-md); padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); cursor: pointer; transition: 0.2s; border: 1px solid rgba(0,0,0,0.05); }
+.kc:hover { transform: translateY(-3px); box-shadow: 0 8px 16px rgba(0,0,0,0.08); }
+
+/* Chat Setup */
 .clist { display: flex; flex-direction: column; gap: 16px; }
 .msg { display: flex; gap: 12px; max-width: 85%; }
 .msg.u { align-self: flex-end; flex-direction: row-reverse; }
-.bub { padding: 12px 18px; border-radius: var(--radius-lg); font-size: 14px; line-height: 1.6; }
-.msg.ai .bub { background: white; border: 1px solid var(--border); border-top-left-radius: 4px; }
-.msg.u .bub { background: var(--primary); color: white; border-top-right-radius: 4px; }
-.av { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; background: var(--primary-light); }
+.bub { padding: 14px 20px; border-radius: 20px; font-size: 15px; line-height: 1.5; }
+.msg.ai .bub { background: #f1f1f3; border-bottom-left-radius: 4px; color: var(--text-main); }
+.msg.u .bub { background: var(--accent); color: white; border-bottom-right-radius: 4px; }
 
-.g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-.g3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-.g4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
-@media(max-width: 768px) { .g3, .g4 { grid-template-columns: 1fr 1fr; } .g2 { grid-template-columns: 1fr; } }
+/* Alerts */
+.alert { padding: 16px; border-radius: var(--radius-md); background: rgba(255, 59, 48, 0.08); border: 1px solid rgba(255, 59, 48, 0.2); color: #c93400; font-size: 14px; font-weight: 500; display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
 
-.stat { background: white; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 20px; text-align: center; }
-.sv { font-size: 32px; font-weight: 800; color: var(--primary); line-height: 1; }
-.sl { font-size: 13px; color: var(--text-muted); margin-top: 8px; font-weight: 500; }
-.sr { border-radius: 50%; border: 4px solid; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 70px; height: 70px; flex-shrink: 0; }
-
-.kanban { display: grid; grid-template-columns: repeat(5, minmax(200px, 1fr)); gap: 16px; padding-bottom: 12px; }
-.kcol { background: rgba(255,255,255,0.4); border: 1px dashed var(--border); border-radius: var(--radius-md); padding: 12px; min-height: 300px; }
-.kc { background: white; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 14px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; box-shadow: var(--shadow-sm); }
-.kc:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); border-color: var(--primary); }
-
-.spin { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: currentColor; border-radius: 50%; animation: sp .6s linear infinite; display: inline-block; vertical-align: middle; }
+/* Utilities */
+.spin { width: 18px; height: 18px; border: 2px solid rgba(0,0,0,0.1); border-top-color: currentColor; border-radius: 50%; animation: sp 0.6s linear infinite; display: inline-block; }
+.bp .spin { border-color: rgba(255,255,255,0.3); border-top-color: white; }
 @keyframes sp { to { transform: rotate(360deg) } }
-.fu { animation: fadeUp 0.3s ease both; }
-@keyframes fadeUp { from { opacity: 0; transform: translateY(10px) } to { opacity: 1; transform: translateY(0) } }
-pre { white-space: pre-wrap; font-family: inherit; font-size: 14px; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(20px) } to { opacity: 1; transform: translateY(0) } }
+pre { white-space: pre-wrap; font-family: 'SF Mono', Consolas, monospace; font-size: 14px; background: rgba(0,0,0,0.03); padding: 16px; border-radius: var(--radius-md); }
 </style>
 </head>
 <body>
@@ -126,90 +138,106 @@ pre { white-space: pre-wrap; font-family: inherit; font-size: 14px; }
 <div id="ml"></div>
 
 <script>
-// ─── ARCHITECTURE SETTINGS ───
+// ─── ERROR HANDLER ───
+window.addEventListener('error', e => {
+  const app = document.getElementById('app');
+  if(app) app.innerHTML = `<div style="display:flex;height:80vh;align-items:center;justify-content:center"><div class="card" style="text-align:center"><h2 style="color:var(--danger)">App Error</h2><p style="margin-bottom:20px">${e.message}</p><button class="btn bs" onclick="localStorage.clear();location.reload()">Reset App</button></div></div>`;
+});
+
+// ─── CONFIG ───
 const PROXY = window.location.protocol === 'https:' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
 
-// ─── STATE MANAGEMENT ───
+// ─── STATE MANAGEMENT (Local-First) ───
 const S = {
-  gKey:'', rKey:'', model:'gemini-2.0-flash-lite',
-  profile:null, cv:'', chat:[], jobs:[], apps:[],
+  gKey:'', model:'gemini-2.0-flash-lite',
+  profile:null, cv:'', chat:[], apps:[],
   tab:'dash', step:0, busy:false,
-  jd:null, draft:null, draftCtx:{}, lastQ:'', lastL:'Bengaluru'
+  jd:null, draft:null, draftCtx:{}
 };
 
-const R = (k) => { try { return localStorage.getItem('jai_'+k) } catch { return null } };
+const R = k => { try { return localStorage.getItem('jai_'+k) } catch { return null } };
 const W = (k, v) => { try { localStorage.setItem('jai_'+k, typeof v==='string'?v:JSON.stringify(v)) } catch {} };
 
 function persist() {
-  W('gk', S.gKey); W('rk', S.rKey); W('mod', S.model);
-  W('cv', S.cv.slice(0,9000)); W('pf', JSON.stringify(S.profile));
-  W('ap', JSON.stringify(S.apps)); W('ch', JSON.stringify(S.chat.slice(-30)));
+  W('gk', S.gKey); W('cv', S.cv.slice(0,15000)); W('pf', S.profile); W('ap', S.apps); W('ch', S.chat.slice(-30));
 }
 
 function hydrate() {
-  S.gKey = R('gk')||''; S.rKey = R('rk')||''; S.model = R('mod')||'gemini-2.0-flash-lite';
-  S.cv = R('cv')||'';
+  S.gKey = R('gk')||''; S.cv = R('cv')||'';
   try { S.profile = JSON.parse(R('pf')); } catch { S.profile = null; }
   try { S.apps = JSON.parse(R('ap'))||[]; } catch { S.apps = []; }
   try { S.chat = JSON.parse(R('ch'))||[]; } catch { S.chat = []; }
 }
 
-// ─── UTILITIES ───
+// ─── UTILS ───
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,6);
-const fd = s => s ? new Date(s).toLocaleDateString('en-IN',{day:'numeric',month:'short'}) : '—';
+const fd = s => s ? new Date(s).toLocaleDateString('en-US',{month:'short', day:'numeric'}) : '—';
 const ago = s => s ? Math.floor((Date.now()-new Date(s))/86400000) : 0;
 const today= () => new Date().toISOString().split('T')[0];
-const scC = n => n>=75?'var(--success)':n>=50?'var(--warning)':'var(--danger)';
-const scBg = n => n>=75?'var(--success-bg)':n>=50?'var(--warning-bg)':'var(--danger-bg)';
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
 function md(s){ return String(s||'').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>') }
 
+// ─── DYNAMIC FILE PARSER (PDF, DOCX, TXT) ───
+const loadedLibs = {};
+async function loadLib(url) {
+  if (loadedLibs[url]) return;
+  return new Promise((res, rej) => {
+    const s = document.createElement('script'); s.src = url;
+    s.onload = () => { loadedLibs[url] = true; res(); };
+    s.onerror = () => rej(new Error('Failed to load parser.'));
+    document.head.appendChild(s);
+  });
+}
+
+async function parseFile(file) {
+  const ext = file.name.split('.').pop().toLowerCase();
+  
+  if (ext === 'txt' || ext === 'text') {
+    return new Promise((res, rej) => { const r = new FileReader(); r.onload = e => res(e.target.result); r.onerror = rej; r.readAsText(file); });
+  }
+  if (ext === 'pdf') {
+    await loadLib('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js');
+    window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    const doc = await pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise;
+    let text = '';
+    for (let i = 1; i <= doc.numPages; i++) text += (await (await doc.getPage(i)).getTextContent()).items.map(x => x.str).join(' ') + '\n';
+    return text.trim();
+  }
+  if (ext === 'docx' || ext === 'doc') {
+    await loadLib('https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js');
+    return (await mammoth.extractRawText({ arrayBuffer: await file.arrayBuffer() })).value.trim();
+  }
+  throw new Error('Please upload PDF, Word, or TXT.');
+}
+
+// ─── RAG SPATIAL GROUNDING ───
+function getIndexedProfile() {
+  if (!S.profile) return "";
+  const data = [
+    `Name: ${S.profile.name}`, `Role: ${S.profile.currentRole}`, `Experience: ${S.profile.yearsExp} years`,
+    `Summary: ${S.profile.summary}`, `Skills: ${(S.profile.skills || []).join(', ')}`
+  ];
+  return data.map((line, i) => `[Line ${i + 1}] ${line}`).join('\n');
+}
+
 // ─── API CONNECTORS ───
-async function callGemini(contents, temp=0.7, maxTok=2048) {
-  const body = { contents, generationConfig:{temperature:temp, maxOutputTokens:maxTok} };
+async function gemini(prompt, temp=0.7, maxTok=2048) {
+  const body = { contents: [{role:'user', parts:[{text:prompt}]}], generationConfig:{temperature:temp, maxOutputTokens:maxTok} };
   const headers = { 'Content-Type': 'application/json' };
   if (PROXY && S.gKey) headers['x-user-gemini-key'] = S.gKey;
   
   const url = PROXY ? '/api/gemini' : `https://generativelanguage.googleapis.com/v1beta/models/${S.model}:generateContent?key=${S.gKey}`;
   const r = await fetch(url, {method:'POST', headers, body:JSON.stringify(body)});
-  if (!r.ok) { const e=await r.json().catch(()=>({})); throw new Error(e.error?.message||'Gemini error'); }
-  const d = await r.json();
-  return d.candidates?.[0]?.content?.parts?.[0]?.text || '';
-}
-
-async function gemini(prompt, temp=0.7, maxTok=2048) { return callGemini([{role:'user', parts:[{text:prompt}]}], temp, maxTok); }
-async function geminiChat(userMsg, system, history=[]) {
-  const contents = [{role:'user', parts:[{text:system}]}, {role:'model', parts:[{text:'Understood.'}]}];
-  history.forEach(m => contents.push({role:m.r==='ai'?'model':'user', parts:[{text:m.t}]}));
-  contents.push({role:'user', parts:[{text:userMsg}]});
-  return callGemini(contents);
+  if (!r.ok) throw new Error((await r.json().catch(()=>({}))).error?.message || 'Gemini error');
+  return (await r.json()).candidates?.[0]?.content?.parts?.[0]?.text || '';
 }
 
 function parseJSON(t) {
   const c = t.replace(/```json|```/g,'').trim();
-  const ci = c.indexOf('{'), di = c.lastIndexOf('}'), ai = c.indexOf('['), bi = c.lastIndexOf(']');
-  if (ai!==-1 && bi!==-1 && (ci===-1 || ai<ci)) return JSON.parse(c.slice(ai,bi+1));
-  if (ci!==-1 && di!==-1) return JSON.parse(c.slice(ci,di+1));
-  throw new Error('No JSON in response');
-}
-
-async function jsearch(query, loc) {
-  const q = encodeURIComponent(query+' '+loc);
-  const headers = {};
-  if (PROXY && S.rKey) headers['x-user-search-key'] = S.rKey;
-  else if (!PROXY) { headers['X-RapidAPI-Key'] = S.rKey; headers['X-RapidAPI-Host'] = 'jsearch.p.rapidapi.com'; }
-
-  const url = PROXY ? `/api/jsearch?query=${q}&page=1&num_pages=2&date_posted=week` : `https://jsearch.p.rapidapi.com/search?query=${q}&page=1&num_pages=2&date_posted=week`;
-  const r = await fetch(url, { headers });
-  if (!r.ok) throw new Error('JSearch error. Verify your RapidAPI key.');
-  return (await r.json()).data || [];
-}
-
-async function scoreJobs(raw) {
-  if (!raw.length) return [];
-  const lines = raw.map((j,i)=> `[${i}] "${j.job_title}" at ${j.employer_name}\nSkills: ${(j.job_required_skills||[]).join(', ')||j.job_description?.slice(0,150)||'N/A'}`).join('\n---\n');
-  const prompt = `Score each job. Candidate: Role: ${S.profile.currentRole} | Exp: ${S.profile.yearsExp}yrs | Skills: ${(S.profile.skills||[]).join(', ')}. JOBS:\n${lines}\nReturn ONLY a JSON array, exactly ${raw.length} items: [{"i":0,"score":82,"matched":["Python"],"missing":["Kafka"],"tag":"Good fit"}]`;
-  return parseJSON(await gemini(prompt, 0.2, 1500));
+  const ci = c.indexOf('{'), ai = c.indexOf('[');
+  if (ai!==-1 && (ci===-1 || ai<ci)) return JSON.parse(c.slice(ai, c.lastIndexOf(']')+1));
+  if (ci!==-1) return JSON.parse(c.slice(ci, c.lastIndexOf('}')+1));
+  throw new Error('No JSON output');
 }
 
 // ─── RENDER ENGINE ───
@@ -222,51 +250,43 @@ function render() {
 
 function renderSetup() {
   if (S.step===0) return `
-<div style="min-height:90vh;display:flex;align-items:center;justify-content:center;">
-<div style="width:100%;max-width:480px">
-  <div style="text-align:center;margin-bottom:32px">
-    <h1 style="font-size:32px;color:var(--primary);margin-bottom:8px;">JobAI Pro</h1>
-    <p style="color:var(--text-muted);">Intelligent Career Automation</p>
-  </div>
-  <div class="card" style="padding:32px">
-    ${PROXY?`<div style="padding:12px;background:var(--success-bg);color:var(--success);border-radius:var(--radius-md);margin-bottom:20px;font-size:13px;font-weight:600;">✓ Secure Proxy Mode Active</div>`:''}
-    <div style="margin-bottom:20px">
-      <label style="font-size:13px;font-weight:600;display:flex;justify-content:space-between">Gemini API Key <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:var(--primary);text-decoration:none;">Get free key →</a></label>
-      <input class="inp" id="i-gk" type="password" placeholder="AIzaSy..." value="${esc(S.gKey)}" style="margin-top:8px;">
-    </div>
-    <div style="margin-bottom:24px">
-      <label style="font-size:13px;font-weight:600;display:flex;justify-content:space-between">RapidAPI Key (Optional) <a href="https://rapidapi.com/letscrape-6bRBa3QguO5/api/jsearch" target="_blank" style="color:var(--primary);text-decoration:none;">Get key →</a></label>
-      <input class="inp" id="i-rk" type="password" placeholder="For live Job Search feature..." value="${esc(S.rKey)}" style="margin-top:8px;">
-    </div>
-    <button class="btn bp" id="s0-btn" style="width:100%;padding:14px;font-size:15px;">Save & Continue</button>
+<div style="height:80vh;display:flex;align-items:center;justify-content:center;">
+<div style="width:100%;max-width:480px;text-align:center;">
+  <h1 class="header-title" style="margin-bottom:8px;">JobAI Pro</h1>
+  <p style="margin-bottom:32px;">Intelligent Career Automation</p>
+  <div class="card" style="text-align:left;">
+    ${PROXY?`<div class="chip success" style="margin-bottom:20px;display:flex;justify-content:center;">✓ Secure Vercel Proxy Active</div>`:''}
+    <label style="font-size:14px;font-weight:600;display:flex;justify-content:space-between;margin-bottom:8px;">Gemini API Key <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:var(--accent);text-decoration:none;">Get free key</a></label>
+    <input class="inp" id="i-gk" type="password" placeholder="AIzaSy..." value="${esc(S.gKey)}" style="margin-bottom:24px;">
+    <button class="btn bp" id="s0-btn" style="width:100%;padding:16px;">Continue</button>
   </div>
 </div></div>`;
 
   if (S.step===1) return `
-<div style="min-height:90vh;display:flex;align-items:center;justify-content:center;">
-<div style="width:100%;max-width:600px">
-  <div style="text-align:center;margin-bottom:24px"><h2 style="font-size:24px;">Upload your CV</h2><p style="color:var(--text-muted);margin-top:8px;">Paste your text below or upload a .txt file to initialize your career profile.</p></div>
-  <div class="card" style="padding:24px">
-    <textarea class="inp ta" id="i-cv" placeholder="Paste your complete CV / resume here..." style="min-height:300px;margin-bottom:16px;">${esc(S.cv)}</textarea>
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-      <label class="btn bs btn-sm" style="cursor:pointer">📎 Upload .txt <input type="file" id="i-file" accept=".txt" style="display:none"></label>
-      <span id="fn" style="font-size:12px;color:var(--text-muted)"></span>
+<div style="min-height:80vh;display:flex;align-items:center;justify-content:center;">
+<div style="width:100%;max-width:640px;">
+  <div style="text-align:center;margin-bottom:24px"><h2 style="font-size:24px;">Upload your CV</h2><p>Paste text or upload a PDF/Word/TXT document.</p></div>
+  <div class="card">
+    <textarea class="inp ta" id="i-cv" placeholder="Paste your resume here..." style="min-height:250px;margin-bottom:16px;">${esc(S.cv)}</textarea>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+      <label class="btn bs btn-sm">📎 Upload File <input type="file" id="i-file" accept=".txt,.text,.pdf,.doc,.docx" style="display:none"></label>
+      <span id="fn" style="font-size:13px;font-weight:600;"></span>
     </div>
-    <button class="btn bp" id="s1-btn" style="width:100%;padding:14px;">${S.busy ? '<span class="spin"></span> Processing...' : 'Analyze CV'}</button>
+    <button class="btn bp" id="s1-btn" style="width:100%;">${S.busy ? '<span class="spin"></span> Processing...' : 'Analyze CV'}</button>
   </div>
 </div></div>`;
 
   return `
-<div style="min-height:90vh;display:flex;align-items:center;justify-content:center;">
-<div style="width:100%;max-width:640px">
-  <div class="card" style="overflow:hidden">
-    <div style="padding:16px 24px;background:rgba(255,255,255,0.5);border-bottom:1px solid var(--border);font-weight:700;">Profile Setup Assistant</div>
-    <div id="cb" class="clist" style="padding:24px;height:400px;overflow-y:auto">
-      ${S.chat.map(m=>`<div class="msg ${m.r==='ai'?'ai':'u'}"><div class="av">${m.r==='ai'?'🤖':'👤'}</div><div class="bub">${md(esc(m.t))}</div></div>`).join('')}
-      ${S.busy ? `<div class="msg ai"><div class="av">🤖</div><div class="bub"><span class="spin" style="border-color:var(--primary);border-top-color:transparent;"></span></div></div>` : ''}
+<div style="min-height:80vh;display:flex;align-items:center;justify-content:center;">
+<div style="width:100%;max-width:640px;">
+  <div class="card" style="padding:0;overflow:hidden;">
+    <div style="padding:20px;background:rgba(0,0,0,0.02);border-bottom:1px solid var(--glass-border);font-weight:700;text-align:center;">Profile Setup</div>
+    <div id="cb" class="clist" style="padding:24px;height:350px;overflow-y:auto;">
+      ${S.chat.map(m=>`<div class="msg ${m.r==='ai'?'ai':'u'}"><div class="bub">${md(esc(m.t))}</div></div>`).join('')}
+      ${S.busy ? `<div class="msg ai"><div class="bub"><span class="spin"></span></div></div>` : ''}
     </div>
-    <div style="padding:16px;border-top:1px solid var(--border);display:flex;gap:12px;background:rgba(255,255,255,0.5);">
-      <input class="inp" id="ci" placeholder="Type answer..." style="flex:1" ${S.busy?'disabled':''}>
+    <div style="padding:16px;border-top:1px solid var(--glass-border);display:flex;gap:12px;">
+      <input class="inp" id="ci" placeholder="Type answer..." ${S.busy?'disabled':''}>
       <button class="btn bp" id="cs" ${S.busy?'disabled':''}>Send</button>
     </div>
   </div>
@@ -275,246 +295,290 @@ function renderSetup() {
 
 function renderApp() {
   const tabs = [
-    {id:'dash', l:'🏠 Dashboard'}, {id:'hunt', l:'🔍 Job Hunt'}, {id:'analyze', l:'🧠 Analyzer'},
-    {id:'tracker', l:'📋 Tracker'}, {id:'drafts', l:'✉️ Drafts'}, {id:'profile', l:'👤 Profile'}
+    {id:'dash', l:'Dashboard'}, {id:'hunt', l:'X-Ray Hunt'}, {id:'analyze', l:'Analyzer'},
+    {id:'tracker', l:'Tracker'}, {id:'drafts', l:'Drafts'}, {id:'profile', l:'Profile'}
   ];
   const body = {dash:tDash, hunt:tHunt, analyze:tAnalyze, tracker:tTracker, drafts:tDrafts, profile:tProfile}[S.tab]?.() || '';
   
   return `
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
-  <h1 style="font-size:24px;color:var(--primary);">JobAI <span style="color:var(--text-main);font-weight:500;">Pro</span></h1>
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:32px;">
+  <h1 class="header-title">JobAI Pro</h1>
   <div style="display:flex;gap:12px;">
-    <button class="btn bs btn-sm" onclick="openSettings()">⚙ Settings</button>
-    <button class="btn bs btn-sm" id="rst">Reset</button>
+    <button class="btn bs btn-sm" onclick="openSettings()">Settings</button>
+    <button class="btn bs btn-sm" id="rst" style="color:var(--danger)">Reset</button>
   </div>
 </div>
-<div class="nav">${tabs.map(t=>`<button class="nb ${S.tab===t.id?'on':''}" data-t="${t.id}">${t.l}</button>`).join('')}</div>
-<div class="fu">${body}</div>`;
+${body}
+<div class="nav-container">
+  ${tabs.map(t=>`<button class="nb ${S.tab===t.id?'on':''}" data-t="${t.id}">${t.l}</button>`).join('')}
+</div>`;
 }
 
-// ─── TAB 1: DASHBOARD
+// ─── TAB 1: DASHBOARD & ALERTS ───
 function tDash() {
-  return `<div class="g4" style="margin-bottom:24px;">
-    <div class="stat"><div class="sv">${S.apps.length}</div><div class="sl">Total Tracked</div></div>
-    <div class="stat"><div class="sv" style="color:var(--success)">${S.apps.filter(a=>a.status==='interview').length}</div><div class="sl">Interviews</div></div>
-    <div class="stat"><div class="sv" style="color:var(--primary)">${S.profile?.yearsExp||0}</div><div class="sl">Years Exp</div></div>
-    <div class="stat"><div class="sv" style="color:var(--warning)">${S.apps.filter(a=>a.status==='saved').length}</div><div class="sl">Saved Jobs</div></div>
-  </div>
-  <div class="card" style="padding:48px;text-align:center;">
-    <h3 style="margin-bottom:12px;font-size:24px;">Ready for your next application?</h3>
-    <p style="color:var(--text-muted);margin-bottom:24px;">Your profile is locked in. Let the AI find and tailor your next move.</p>
-    <div style="display:flex;justify-content:center;gap:16px;">
-      <button class="btn bp" onclick="goTab('hunt')">🔍 Search Live Jobs</button>
-      <button class="btn bs" onclick="goTab('analyze')">🧠 Analyze a JD</button>
+  const due = S.apps.filter(a => a.status === 'applied' && ago(a.date) >= 7);
+  return `
+<div class="g3" style="margin-bottom:32px;">
+  <div class="stat-box"><div class="stat-val">${S.apps.length}</div><div class="stat-lbl">Tracked Jobs</div></div>
+  <div class="stat-box"><div class="stat-val" style="color:var(--success)">${S.apps.filter(a=>a.status==='interview').length}</div><div class="stat-lbl">Interviews</div></div>
+  <div class="stat-box"><div class="stat-val" style="color:var(--accent)">${S.profile?.yearsExp||0}</div><div class="stat-lbl">Years Exp</div></div>
+</div>
+
+${due.length > 0 ? `
+<div class="card" style="border-color:var(--warning);">
+  <h3 style="display:flex;align-items:center;gap:8px;color:#b45309;">⚠️ Follow-up Required (${due.length})</h3>
+  <p style="margin-bottom:16px;">These applications have been sitting for 7 days. Push a follow-up message now.</p>
+  ${due.map(a => `
+    <div class="alert">
+      <div><strong>${esc(a.role)}</strong> at ${esc(a.company)}</div>
+      <button class="btn bp btn-sm" onclick="triggerFollowup('${a.id}')">Draft Push Alert</button>
     </div>
-  </div>`;
+  `).join('')}
+</div>` : ''}
+
+<div class="card" style="text-align:center;padding:48px 24px;">
+  <h2 style="font-size:28px;margin-bottom:12px;">Ready to hunt?</h2>
+  <p style="margin-bottom:24px;">Use X-Ray search to bypass APIs, or paste a JD for 0-hallucination analysis.</p>
+  <div style="display:flex;justify-content:center;gap:16px;">
+    <button class="btn bp" onclick="goTab('hunt')">X-Ray Search</button>
+    <button class="btn bs" onclick="goTab('analyze')">Open Analyzer</button>
+  </div>
+</div>`;
 }
 
-// ─── TAB 2: JOB HUNT
+// ─── TAB 2: X-RAY JOB SOURCING ───
 function tHunt() {
-  return `<div class="card" style="padding:24px;">
-    <h2 style="margin-bottom:8px;">🔍 Live Job Aggregator</h2>
-    <p style="color:var(--text-muted);margin-bottom:24px;">Searches internet and auto-scores each listing against your profile.</p>
-    <div class="g2" style="margin-bottom:16px;">
-      <input class="inp" id="sq" placeholder="Keywords (e.g. Product Manager)" value="${esc(S.lastQ)}">
-      <input class="inp" id="sl" placeholder="Location (e.g. Bengaluru)" value="${esc(S.lastL)}">
+  return `<div class="card">
+    <h2>X-Ray Job Sourcing</h2>
+    <p style="margin-bottom:24px;">Bypass API limits. Generate a Google Search to scrape ATS databases (Lever, Greenhouse, Workday) directly.</p>
+    <div class="g2" style="margin-bottom:24px;">
+      <div><label style="font-size:14px;font-weight:600;display:block;margin-bottom:8px;">Target Role</label><input class="inp" id="x-role" value="${esc(S.profile?.targetRoles?.[0] || '')}"></div>
+      <div><label style="font-size:14px;font-weight:600;display:block;margin-bottom:8px;">Location</label><input class="inp" id="x-loc" value="${esc(S.profile?.location || '')}"></div>
     </div>
-    <button class="btn bp" id="hunt-btn">${S.busy&&!S.jobs.length?'<span class="spin"></span> Searching...':'Search & Score Jobs'}</button>
-  </div>
-  <div style="margin-top:24px;">${S.jobs.sort((a,b)=>b.score-a.score).map(j=>`
-    <div class="card" style="padding:16px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="openJob('${j.id}')">
-      <div><h3 style="font-size:16px;margin-bottom:4px;">${esc(j.job_title)}</h3><p style="color:var(--text-muted);font-size:13px;">${esc(j.employer_name)}</p></div>
-      <div class="sr" style="border-color:${scC(j.score)};width:60px;height:60px;"><span style="font-weight:700;color:${scC(j.score)}">${j.score}%</span></div>
-    </div>`).join('')}
+    <button class="btn bp" onclick="executeXRay()">Generate Deep Search</button>
+    <div style="margin-top:24px;padding:16px;background:rgba(0,0,0,0.03);border-radius:var(--radius-md);">
+      <strong>Workflow:</strong> 1. Click search. 2. Copy the job text from the page. 3. Paste it into the <strong>Analyzer</strong>.
+    </div>
   </div>`;
 }
 
-// ─── TAB 3: ANALYZER
+// ─── TAB 3: LINE-INDEXED ANALYZER & RECRUITER ───
 function tAnalyze() {
-  return `<div class="card" style="padding:24px;">
-    <h2 style="margin-bottom:8px;">🧠 Job Description Analyzer</h2>
-    <p style="color:var(--text-muted);margin-bottom:16px;">Paste a JD. AI will do exact date math and gap analysis without hallucinating skills.</p>
-    <textarea class="inp ta" id="jd-ta" placeholder="Paste full Job Description here..." style="min-height:180px;margin-bottom:16px;"></textarea>
+  return `<div class="card">
+    <h2>RAG Analyzer & Recruiter Scraper</h2>
+    <p style="margin-bottom:16px;">Paste a JD. AI uses Line-Indexing to prove skills exist, and attempts to scrape the Recruiter's email.</p>
+    <textarea class="inp ta" id="jd-ta" placeholder="Paste JD here..." style="min-height:200px;margin-bottom:16px;"></textarea>
     <button class="btn bp" id="analyze-btn">${S.busy&&!S.jd?'<span class="spin"></span> Analyzing...':'Analyze Match'}</button>
   </div>
-  ${S.jd ? `<div class="card" style="padding:24px;margin-top:24px;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-      <h3>${esc(S.jd.roleName)} at ${esc(S.jd.company)}</h3>
-      <div class="sr" style="border-color:${scC(S.jd.score)};width:70px;height:70px;"><span style="font-weight:700;font-size:20px;color:${scC(S.jd.score)}">${S.jd.score}%</span></div>
+  
+  ${S.jd ? `<div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;">
+      <div><h3>${esc(S.jd.roleName)}</h3><p>${esc(S.jd.company)}</p></div>
+      <div class="stat-box" style="padding:16px;min-width:100px;"><div class="stat-val" style="color:${scC(S.jd.score)};font-size:32px;">${S.jd.score}%</div></div>
     </div>
-    <div style="background:var(--bg-main);padding:16px;border-radius:var(--radius-md);margin-bottom:16px;"><strong>Verdict:</strong> ${esc(S.jd.verdict)}</div>
-    <div class="g2" style="margin-bottom:16px;">
-      <div><strong style="color:var(--success);font-size:13px;">Matched Skills</strong><div style="margin-top:8px;">${(S.jd.matchedSkills||[]).map(s=>`<span class="chip cg" style="margin:2px;">${esc(s)}</span>`).join('')}</div></div>
-      <div><strong style="color:var(--danger);font-size:13px;">Missing Skills</strong><div style="margin-top:8px;">${(S.jd.missingSkills||[]).map(s=>`<span class="chip ca" style="margin:2px;">${esc(s)}</span>`).join('')}</div></div>
+    <div style="background:rgba(0,0,0,0.03);padding:16px;border-radius:var(--radius-md);margin-bottom:24px;">${esc(S.jd.verdict)}</div>
+    
+    <div class="g2" style="margin-bottom:24px;">
+      <div><strong style="color:var(--success);display:block;margin-bottom:8px;">Verified Skills</strong>
+      ${(S.jd.matchedSkills||[]).map(s=>`<span class="chip success" style="margin:0 4px 4px 0;">${esc(s)}</span>`).join('')}</div>
+      <div><strong style="color:var(--danger);display:block;margin-bottom:8px;">Missing Skills</strong>
+      ${(S.jd.missingSkills||[]).map(s=>`<span class="chip danger" style="margin:0 4px 4px 0;">${esc(s)}</span>`).join('')}</div>
     </div>
-    <div style="display:flex;gap:12px;margin-top:20px;">
-      <button class="btn bp btn-sm" onclick="draftFromJD()">✉️ Auto-Draft Outreach</button>
-      <button class="btn bs btn-sm" onclick="saveJDToTracker()">🔖 Save to Tracker</button>
+
+    ${S.jd.recruiterName ? `
+    <div style="border:1px solid rgba(0,113,227,0.3);background:rgba(0,113,227,0.05);padding:16px;border-radius:var(--radius-md);margin-bottom:24px;">
+      <strong style="color:var(--accent);display:block;margin-bottom:4px;">👤 Recruiter Extracted: ${esc(S.jd.recruiterName)}</strong>
+      <p style="font-size:13px;">Suggested Email: <strong>${esc(S.jd.suggestedEmail)}</strong> <button class="btn bs btn-xs" onclick="copyText('${esc(S.jd.suggestedEmail)}', this)">Copy</button></p>
+    </div>` : ''}
+
+    <div style="display:flex;gap:12px;">
+      <button class="btn bp" onclick="draftFromJD()">Draft Outreach</button>
+      <button class="btn bs" onclick="saveJDToTracker()">Save to Tracker</button>
     </div>
   </div>` : ''}`;
 }
 
-// ─── TAB 4: TRACKER
+// ─── TAB 4: TRACKER ───
 function tTracker() {
-  const cols = [{id:'saved',l:'Saved'}, {id:'applied',l:'Applied'}, {id:'followup',l:'Follow-up'}, {id:'interview',l:'Interview'}, {id:'offer',l:'Offer'}];
-  return `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-    <h2>📋 Application Tracker</h2>
-    <div style="display:flex;gap:8px;">
-      <button class="btn bs btn-sm" onclick="exportCSV()">⬇ Export CSV</button>
-      <button class="btn bp btn-sm" id="add2-btn">+ Add Job</button>
-    </div>
+  const cols = [{id:'saved',l:'Saved'}, {id:'applied',l:'Applied'}, {id:'interview',l:'Interview'}, {id:'offer',l:'Offer'}];
+  return `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+    <h2>Application Tracker</h2>
+    <button class="btn bp btn-sm" id="add2-btn">+ Add Job</button>
   </div>
   <div class="kanban">
-    ${cols.map(c=>`<div class="kcol"><h3 style="font-size:13px;color:var(--text-muted);margin-bottom:12px;text-transform:uppercase;font-weight:700;">${c.l}</h3>
-      ${S.apps.filter(a=>a.status===c.id).map(a=>`<div class="kc" onclick="openApp('${a.id}')"><strong style="font-size:14px;display:block;margin-bottom:4px;">${esc(a.role)}</strong><p style="font-size:12px;color:var(--text-muted);">${esc(a.company)}</p></div>`).join('')}
+    ${cols.map(c=>`<div class="kcol"><h3 style="font-size:14px;color:var(--text-muted);margin-bottom:16px;">${c.l}</h3>
+      ${S.apps.filter(a=>a.status===c.id).map(a=>`<div class="kc" onclick="openApp('${a.id}')"><strong style="font-size:15px;display:block;margin-bottom:4px;">${esc(a.role)}</strong><p style="font-size:13px;">${esc(a.company)}</p></div>`).join('')}
     </div>`).join('')}
   </div>`;
 }
 
-// ─── TAB 5: DRAFTS
+// ─── TAB 5: DRAFTS (Deep Linking) ───
 function tDrafts() {
   const d = S.draft || {};
-  return `<div class="card" style="padding:24px;margin-bottom:24px;">
-    <h2 style="margin-bottom:8px;">✉️ Zero-Hallucination Drafter</h2>
-    <p style="color:var(--text-muted);margin-bottom:16px;">Generates networking messages strictly using your CV data.</p>
-    <div class="g2" style="margin-bottom:16px;">
-      <div><label style="font-size:13px;font-weight:600;">Company</label><input class="inp" id="d-co" value="${esc(S.draftCtx.co||'')}"></div>
-      <div><label style="font-size:13px;font-weight:600;">Role</label><input class="inp" id="d-ro" value="${esc(S.draftCtx.ro||'')}"></div>
-      <div><label style="font-size:13px;font-weight:600;">Type</label><select class="inp" id="d-ty"><option value="cold" ${S.draftCtx.ty==='cold'?'selected':''}>Cold Email</option><option value="linkedin" ${S.draftCtx.ty==='linkedin'?'selected':''}>LinkedIn Message</option></select></div>
+  return `<div class="card">
+    <h2>Humanized Drafter</h2>
+    <p style="margin-bottom:24px;">Generates networking messages with a strict conversational tone, directly pushing to your native apps.</p>
+    <div class="g3" style="margin-bottom:16px;">
+      <div><label style="font-size:14px;font-weight:600;display:block;margin-bottom:8px;">Company</label><input class="inp" id="d-co" value="${esc(S.draftCtx.co||'')}"></div>
+      <div><label style="font-size:14px;font-weight:600;display:block;margin-bottom:8px;">Role</label><input class="inp" id="d-ro" value="${esc(S.draftCtx.ro||'')}"></div>
+      <div><label style="font-size:14px;font-weight:600;display:block;margin-bottom:8px;">Type</label>
+        <select class="inp" id="d-ty">
+          <option value="cold email" ${S.draftCtx.ty==='cold email'?'selected':''}>Cold Email</option>
+          <option value="linkedin message" ${S.draftCtx.ty==='linkedin message'?'selected':''}>LinkedIn Message</option>
+          <option value="whatsapp message" ${S.draftCtx.ty==='whatsapp message'?'selected':''}>WhatsApp Intro</option>
+        </select>
+      </div>
     </div>
-    <button class="btn bp" id="draft-btn">${S.busy&&!d.body?'<span class="spin"></span> Drafting...':'Generate Outreach'}</button>
+    <button class="btn bp" id="draft-btn">${S.busy&&!d.body?'<span class="spin"></span> Drafting...':'Generate Humanized Message'}</button>
   </div>
-  ${d.body ? `<div class="card" style="padding:24px;">
-    ${d.sub ? `<div style="margin-bottom:12px;"><strong>Subject:</strong> ${esc(d.sub)}</div>` : ''}
-    <div style="background:var(--bg-main);padding:16px;border-radius:var(--radius-md);margin-bottom:16px;"><pre>${esc(d.body)}</pre></div>
-    <div style="display:flex;gap:12px;">
-      <button class="btn bp btn-sm" id="copy-btn">📋 Copy</button>
-      ${S.draftCtx.ty==='cold'?`<a href="mailto:?subject=${encodeURIComponent(d.sub)}&body=${encodeURIComponent(d.body)}" class="btn bs btn-sm">Open Mail</a>`:''}
+  
+  ${d.body ? `<div class="card">
+    ${d.sub ? `<h3 style="margin-bottom:16px;">Subject: ${esc(d.sub)}</h3>` : ''}
+    <pre id="dp" style="margin-bottom:24px;">${esc(d.body)}</pre>
+    
+    <h3 style="font-size:14px;margin-bottom:12px;">Push to App:</h3>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;">
+      <a href="mailto:?subject=${encodeURIComponent(d.sub)}&body=${encodeURIComponent(d.body)}" class="btn bp">✉️ Native Email</a>
+      <a href="https://wa.me/?text=${encodeURIComponent(d.body)}" target="_blank" class="btn" style="background:#25D366;color:white;">💬 WhatsApp</a>
+      <button class="btn" style="background:#0a66c2;color:white;" onclick="copyAndOpenLinkedIn()">💼 LinkedIn Chat</button>
+      <button class="btn bs" onclick="copyText(document.getElementById('dp').textContent, this)">Copy Raw</button>
     </div>
   </div>` : ''}`;
 }
 
-// ─── TAB 6: PROFILE
+// ─── TAB 6: PROFILE ───
 function tProfile() {
   const p = S.profile;
   if(!p) return `<p>No profile</p>`;
-  return `<div class="card" style="padding:32px;"><div style="display:flex;justify-content:space-between;align-items:flex-start;"><h2 style="font-size:28px;margin-bottom:8px;">${esc(p.name)}</h2><span class="chip cp" style="font-size:14px;">${p.yearsExp} YOE</span></div><p style="color:var(--text-muted);margin-bottom:24px;font-size:16px;">${esc(p.currentRole)} · ${esc(p.location)}</p>
-  <h3 style="font-size:14px;margin-bottom:12px;">Verified Skills</h3><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px;">${(p.skills||[]).map(s=>`<span class="chip cg">${esc(s)}</span>`).join('')}</div>
-  <h3 style="font-size:14px;margin-bottom:12px;">Target Roles</h3><div style="display:flex;gap:8px;flex-wrap:wrap;">${(p.targetRoles||[]).map(s=>`<span class="chip cp">${esc(s)}</span>`).join('')}</div></div>`;
+  return `<div class="card"><div style="display:flex;justify-content:space-between;align-items:flex-start;"><h2 style="font-size:32px;">${esc(p.name)}</h2><span class="chip success">${p.yearsExp} YOE</span></div><p style="margin-bottom:24px;font-size:18px;">${esc(p.currentRole)} · ${esc(p.location)}</p>
+  <h3 style="margin-bottom:12px;">Verified Skills</h3><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px;">${(p.skills||[]).map(s=>`<span class="chip">${esc(s)}</span>`).join('')}</div></div>`;
 }
 
-// ─── MODALS & SETTINGS ───
+// ─── MODALS ───
 function openSettings() {
-  modal(`
-    <h2 style="margin-bottom:16px;">⚙ API Settings</h2>
-    <label style="font-size:13px;font-weight:600;">Gemini API Key</label>
-    <input class="inp" id="cfg-gk" type="password" value="${esc(S.gKey)}" style="margin-bottom:16px;">
-    <label style="font-size:13px;font-weight:600;">RapidAPI Key</label>
-    <input class="inp" id="cfg-rk" type="password" value="${esc(S.rKey)}" style="margin-bottom:24px;">
-    <div style="display:flex;gap:12px;"><button class="btn bs" onclick="closeM()">Cancel</button><button class="btn bp" onclick="S.gKey=document.getElementById('cfg-gk').value;S.rKey=document.getElementById('cfg-rk').value;persist();closeM();render();">Save locally</button></div>
-  `);
-}
-
-function openJob(id) {
-  const j = S.jobs.find(x=>x.id===id); if(!j) return;
-  modal(`
-    <h3 style="margin-bottom:4px;">${esc(j.job_title)}</h3><p style="color:var(--text-muted);margin-bottom:16px;">${esc(j.employer_name)}</p>
-    <div style="display:flex;gap:12px;margin-bottom:16px;">${(j.matched||[]).map(s=>`<span class="chip cg">${esc(s)}</span>`).join('')}</div>
-    <div style="background:var(--bg-main);padding:12px;border-radius:var(--radius-md);margin-bottom:20px;max-height:150px;overflow-y:auto;font-size:13px;">${esc((j.job_description||'').slice(0,500))}...</div>
-    <div style="display:flex;gap:8px;"><button class="btn bp btn-sm" onclick="closeM();draftFromJob('${j.id}')">✉️ Email</button><button class="btn bs btn-sm" onclick="closeM();markApplied('${j.id}')">✓ Mark Applied</button></div>
-  `);
+  modal(`<h2>Settings</h2>
+    <label style="font-size:14px;font-weight:600;display:block;margin-bottom:8px;">Gemini API Key</label>
+    <input class="inp" id="cfg-gk" type="password" value="${esc(S.gKey)}" style="margin-bottom:24px;">
+    <div style="display:flex;gap:12px;"><button class="btn bs" onclick="closeM()">Cancel</button><button class="btn bp" onclick="S.gKey=document.getElementById('cfg-gk').value;persist();closeM();render();">Save</button></div>`);
 }
 
 function openApp(id) {
   const a = S.apps.find(x=>x.id===id); if(!a) return;
-  modal(`
-    <h3 style="margin-bottom:4px;">${esc(a.role)}</h3><p style="color:var(--text-muted);margin-bottom:16px;">${esc(a.company)}</p>
-    <label style="font-size:13px;font-weight:600;">Status</label>
-    <select class="inp" style="margin-bottom:24px;" onchange="updStatus('${a.id}',this.value)">
+  modal(`<h3 style="font-size:20px;">${esc(a.role)}</h3><p style="margin-bottom:24px;">${esc(a.company)}</p>
+    <label style="font-size:14px;font-weight:600;display:block;margin-bottom:8px;">Status</label>
+    <select class="inp" style="margin-bottom:24px;" onchange="const a=S.apps.find(x=>x.id==='${a.id}'); if(a){a.status=this.value;persist();closeM();render();}">
       <option value="saved" ${a.status==='saved'?'selected':''}>Saved</option>
       <option value="applied" ${a.status==='applied'?'selected':''}>Applied</option>
-      <option value="followup" ${a.status==='followup'?'selected':''}>Follow-up</option>
       <option value="interview" ${a.status==='interview'?'selected':''}>Interview</option>
       <option value="offer" ${a.status==='offer'?'selected':''}>Offer</option>
     </select>
-    <div style="display:flex;gap:8px;"><button class="btn bs btn-sm" onclick="closeM();triggerFollowup('${a.id}')">✉️ Follow-up</button><button class="btn btn-sm" style="background:var(--danger-bg);color:var(--danger);" onclick="delApp('${a.id}')">Delete</button></div>
-  `);
+    <div style="display:flex;gap:12px;"><button class="btn bp" onclick="closeM();triggerFollowup('${a.id}')">Draft Follow-up</button><button class="btn" style="background:var(--danger);color:white;" onclick="if(confirm('Delete?')){S.apps=S.apps.filter(x=>x.id!=='${a.id}');persist();closeM();render();}">Delete</button></div>`);
 }
 
 function addAppModal() {
-  modal(`
-    <h3 style="margin-bottom:16px;">+ Add Application</h3>
+  modal(`<h2>Add Application</h2>
     <input class="inp" id="m-ro" placeholder="Role *" style="margin-bottom:12px;">
     <input class="inp" id="m-co" placeholder="Company *" style="margin-bottom:24px;">
-    <div style="display:flex;gap:12px;"><button class="btn bs" onclick="closeM()">Cancel</button><button class="btn bp" onclick="saveApp()">Save</button></div>
-  `);
+    <div style="display:flex;gap:12px;"><button class="btn bs" onclick="closeM()">Cancel</button><button class="btn bp" onclick="const r=document.getElementById('m-ro').value, c=document.getElementById('m-co').value; if(r&&c){S.apps.push({id:uid(),role:r,company:c,date:today(),status:'saved'});persist();closeM();render();}">Save</button></div>`);
 }
 
 function modal(html) {
-  document.getElementById('ml').innerHTML = `<div style="position:fixed;inset:0;background:rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;z-index:999;" onclick="if(event.target===this)closeM()"><div class="card" style="padding:32px;width:100%;max-width:480px;position:relative;"><button onclick="closeM()" style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:24px;cursor:pointer;color:var(--text-muted);">×</button>${html}</div></div>`;
+  document.getElementById('ml').innerHTML = `<div style="position:fixed;inset:0;background:rgba(255,255,255,0.3);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;z-index:2000;" onclick="if(event.target===this)closeM()"><div class="card" style="width:100%;max-width:440px;position:relative;margin:20px;padding:40px;"><button onclick="closeM()" style="position:absolute;top:20px;right:20px;background:none;border:none;font-size:24px;cursor:pointer;color:var(--text-muted);">×</button>${html}</div></div>`;
 }
 function closeM() { document.getElementById('ml').innerHTML=''; }
 
 // ─── LOGIC HANDLERS ───
 function bindEvents() {
   const on = (id,fn) => { const e=document.getElementById(id); if(e) e.onclick=fn; };
-  on('s0-btn', ()=>{ S.gKey=document.getElementById('i-gk')?.value; S.rKey=document.getElementById('i-rk')?.value; persist(); S.step=1; render(); });
-  const fi = document.getElementById('i-file'); if(fi) fi.onchange=e=>{ const f=e.target.files[0]; if(!f)return; document.getElementById('fn').textContent=f.name; const r=new FileReader(); r.onload=ev=>{document.getElementById('i-cv').value=ev.target.result;}; r.readAsText(f); };
+  on('s0-btn', ()=>{ S.gKey=document.getElementById('i-gk')?.value; persist(); S.step=1; render(); });
+  
+  const fi = document.getElementById('i-file');
+  if (fi) fi.onchange = async e => {
+    const f = e.target.files[0]; if(!f) return;
+    const fnLbl = document.getElementById('fn');
+    fnLbl.innerHTML = '<span class="spin"></span> Extracting...';
+    try { document.getElementById('i-cv').value = await parseFile(f); fnLbl.innerHTML = `<span style="color:var(--success)">✅ Extracted</span>`; } 
+    catch(err) { fnLbl.innerHTML = `<span style="color:var(--danger)">❌ Error</span>`; alert(err.message); }
+  };
+  
   on('s1-btn', ()=>{ S.cv=document.getElementById('i-cv')?.value; S.step=2; persist(); render(); setTimeout(startChat,100); });
-  on('cs', sendChat);
+  const cs = document.getElementById('cs');
+  if(cs) cs.onclick = sendChat;
   const ci=document.getElementById('ci'); if(ci) ci.onkeydown=e=>{if(e.key==='Enter')sendChat();};
   document.querySelectorAll('.nb').forEach(b=>b.onclick=()=>goTab(b.dataset.t));
-  on('rst', ()=>{ if(!confirm('Reset everything?')) return; Object.assign(S,{profile:null,chat:[],apps:[],jobs:[],cv:'',step:0,busy:false}); persist(); render(); });
-  on('hunt-btn', doHunt); on('analyze-btn', doAnalyze); on('draft-btn', doDraft);
-  on('copy-btn', ()=>{ navigator.clipboard.writeText(document.getElementById('dp').textContent); document.getElementById('copy-btn').textContent='✅ Copied'; });
-  on('add2-btn', addAppModal);
+  on('rst', ()=>{ if(!confirm('Reset everything?')) return; Object.assign(S,{profile:null,chat:[],apps:[],cv:'',step:0,busy:false}); persist(); render(); });
+  on('analyze-btn', doAnalyze); on('draft-btn', doDraft); on('add2-btn', addAppModal);
 }
 
-function goTab(t){ S.tab=t; render(); }
+function goTab(t){ S.tab=t; window.scrollTo(0,0); render(); }
+function copyText(t, btn) { navigator.clipboard.writeText(t); const o=btn.innerHTML; btn.innerHTML='Copied!'; setTimeout(()=>btn.innerHTML=o, 2000); }
+function copyAndOpenLinkedIn() { navigator.clipboard.writeText(document.getElementById('dp').textContent); alert('Draft copied! Paste it in LinkedIn chat.'); window.open('https://www.linkedin.com/messaging/', '_blank'); }
 
+function executeXRay() {
+  const role = document.getElementById('x-role').value.trim(); const loc = document.getElementById('x-loc').value.trim();
+  if (!role) { alert('Enter a role'); return; }
+  window.open(`https://www.google.com/search?q=${encodeURIComponent(`(site:lever.co OR site:greenhouse.io OR site:myworkdayjobs.com) "${role}" "${loc}"`)}&tbs=qdr:w`, '_blank');
+}
+
+// ─── AI PIPELINES ───
 async function startChat() {
   S.busy=true; render();
-  try{ const r = await gemini(`You are JobAI. Ask 5 quick questions to finalize profile (Goal, Salary, Location, Co. Type, Top Achievement). NO HALLUCINATION. CV:\n${S.cv}`); S.chat.push({r:'ai',t:r}); }catch(e){}
+  try{ 
+    const contents = [{role:'user', parts:[{text:`You are JobAI. Ask 5 questions to finalize profile. NO HALLUCINATION. CV:\n${S.cv}`}]}];
+    S.chat.push({r:'ai',t:await callGemini(contents)}); 
+  }catch(e){}
   S.busy=false; persist(); render();
 }
 
 async function sendChat() {
   const t=document.getElementById('ci')?.value; if(!t)return; S.chat.push({r:'user',t}); S.busy=true; render();
   try {
-    const r = await geminiChat(t, `Extract JSON profile. RULES: exact date math for yearsExp. NO HALLUCINATION. CV:${S.cv}. Reply ONLY with JSON inside <PROFILE></PROFILE> schema: {"name":"","currentRole":"","yearsExp":0,"location":"","skills":[],"targetRoles":[]}`, S.chat.slice(0,-1));
+    const system = `Extract JSON profile. RULE: yearsExp MUST BE A PURE NUMBER (e.g. 3.5). NO HALLUCINATION. Reply ONLY with JSON inside <PROFILE></PROFILE> schema: {"name":"","currentRole":"","yearsExp":0,"location":"","skills":[],"targetRoles":[]}`;
+    
+    const contents = [{role:'user', parts:[{text:system}]}, {role:'model', parts:[{text:'Understood.'}]}];
+    S.chat.slice(0,-1).forEach(m => contents.push({role:m.r==='ai'?'model':'user', parts:[{text:m.t}]}));
+    contents.push({role:'user', parts:[{text:t}]});
+    
+    const r = await callGemini(contents);
     const m = r.match(/<PROFILE>([\s\S]*?)<\/PROFILE>/);
     if(m) { S.profile=JSON.parse(m[1]); S.tab='dash'; } else S.chat.push({r:'ai',t:r});
   } catch(e){}
   S.busy=false; persist(); render();
 }
 
-async function doHunt() {
-  S.busy=true; S.jobs=[]; render();
-  try { S.jobs = await jsearch(document.getElementById('sq').value, document.getElementById('sl').value); const sc = await scoreJobs(S.jobs); S.jobs=S.jobs.map((j,i)=>({...j, ...(sc.find(x=>x.i===i)||{score:60})})); }catch(e){}
-  S.busy=false; render();
-}
-
 async function doAnalyze() {
-  const jd=document.getElementById('jd-ta').value; S.busy=true; render();
-  try{ S.jd = parseJSON(await gemini(`Compare Candidate to JD. Return JSON: {"roleName":"","company":"","score":0,"verdict":"","matchedSkills":[],"missingSkills":[]}. CANDIDATE: ${JSON.stringify(S.profile)}. JD: ${jd}`, 0.2)); }catch(e){}
+  const jd=document.getElementById('jd-ta').value; if(!jd){ alert('Paste JD'); return; }
+  S.busy=true; render();
+  try{ 
+    const prompt = `You are a strict ATS and Recruiter Scraper. Compare JD to INDEXED PROFILE.
+    1. Extract exact "line_index" to prove skills exist.
+    2. Extract Recruiter Name from the text if visible. If visible, guess their corporate email (e.g., first.last@company.com).
+    
+    INDEXED PROFILE:\n${getIndexedProfile()}\n\nJD:\n${jd}
+    
+    Return EXACTLY JSON:
+    {"roleName":"","company":"","score":85,"verdict":"Assessment.","matchedSkills":[{"skill":"Python","line_index":"[Line 6]"}],"missingSkills":["AWS"],"recruiterName":"John Doe or null","suggestedEmail":"john.doe@company.com or null"}`;
+    
+    S.jd = parseJSON(await gemini(prompt, 0.1)); 
+    if(S.jd.matchedSkills) S.jd.matchedSkills = S.jd.matchedSkills.map(m=>m.skill||m);
+  }catch(e){ alert('Analysis failed'); }
   S.busy=false; render();
 }
 
 async function doDraft() {
-  const co=document.getElementById('d-co').value, ro=document.getElementById('d-ro').value, ty=document.getElementById('d-ty').value; S.busy=true; render();
-  try { const r = await gemini(`Write a ${ty} for ${ro} at ${co} using ONLY profile facts. First line: SUBJECT: [sub]\n\n[body]. CANDIDATE: ${JSON.stringify(S.profile)}`, 0.6); const l=r.split('\n'); S.draftCtx.ty=ty; S.draft={sub:l[0].replace('SUBJECT:','').trim(), body:l.slice(1).join('\n').trim()}; }catch(e){}
+  const co=document.getElementById('d-co').value, ro=document.getElementById('d-ro').value, ty=document.getElementById('d-ty').value, ctx=document.getElementById('d-ctx').value;
+  if(!co||!ro){ alert('Company & Role required'); return; }
+  S.draftCtx={co, ro, ty, ctx}; S.busy=true; S.draft=null; render();
+  try { 
+    const r = await gemini(`Write a ${ty} for ${ro} at ${co}. HUMAN TONE ONLY. Keep it punchy. First line: SUBJECT: [subject]\n\nINDEXED PROFILE:\n${getIndexedProfile()}\n\nCONTEXT:\n${ctx}`, 0.6); 
+    const l=r.split('\n'); S.draft={sub:l[0].replace(/SUBJECT:/i,'').trim(), body:l.slice(1).join('\n').trim()}; 
+  }catch(e){ alert('Draft failed'); }
   S.busy=false; render();
 }
 
-function draftFromJob(id){ const j=S.jobs.find(x=>x.id===id); S.draftCtx={co:j.employer_name,ro:j.job_title,ty:'cold'}; S.tab='drafts'; render(); }
-function draftFromJD(){ S.draftCtx={co:S.jd.company,ro:S.jd.roleName,ty:'cold'}; S.tab='drafts'; render(); }
-function triggerFollowup(id){ const a=S.apps.find(x=>x.id===id); S.draftCtx={co:a.company,ro:a.role,ty:'linkedin'}; S.tab='drafts'; render(); }
-function markApplied(id){ const j=S.jobs.find(x=>x.id===id); S.apps.push({id:uid(),jobId:id,role:j.job_title,company:j.employer_name,score:j.score,url:j.job_apply_link||'',date:today(),status:'applied'}); persist(); }
-function saveJDToTracker(){ S.apps.push({id:uid(),role:S.jd.roleName,company:S.jd.company,score:S.jd.score,date:today(),status:'saved'}); persist(); S.tab='tracker'; render(); }
-function saveApp(){ S.apps.push({id:uid(),role:document.getElementById('m-ro').value,company:document.getElementById('m-co').value,date:today(),status:'saved'}); persist(); closeM(); render(); }
-function updStatus(id,st){ const a=S.apps.find(x=>x.id===id); if(a){a.status=st;persist();closeM();render();} }
-function delApp(id){ S.apps=S.apps.filter(x=>x.id!==id); persist(); closeM(); render(); }
-function exportCSV(){ const rows=[['Role','Company','Status','Date'].join(','), ...S.apps.map(a=>`"${a.role}","${a.company}","${a.status}","${a.date}"`)]; const a=document.createElement('a'); a.href='data:text/csv;charset=utf-8,'+encodeURI(rows.join('\n')); a.download='tracker.csv'; a.click(); }
+function draftFromJD(){ S.draftCtx={co:S.jd.company,ro:S.jd.roleName,ty:'cold email',ctx:`Recruiter Name: ${S.jd.recruiterName||'Unknown'}`}; S.tab='drafts'; window.scrollTo(0,0); render(); }
+function triggerFollowup(id){ const a=S.apps.find(x=>x.id===id); S.draftCtx={co:a.company,ro:a.role,ty:'cold email',ctx:`Following up on application from ${a.date}.`}; S.tab='drafts'; window.scrollTo(0,0); render(); }
+function saveJDToTracker(){ S.apps.push({id:uid(),role:S.jd.roleName,company:S.jd.company,date:today(),status:'saved'}); persist(); S.tab='tracker'; render(); }
 
 hydrate(); if(S.profile && (S.gKey||PROXY)) S.step=3; render();
 </script>
