@@ -3,480 +3,483 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>JobAI Pro - Smart Application Hub</title>
+<title>JobAI Pro</title>
 <style>
-  /* --- MODERN GLASSMORPHISM UI --- */
-  :root {
-    --bg-main: #f0f4f8;
-    --text-primary: #0f172a;
-    --text-secondary: #475569;
-    --accent: #4f46e5;
-    --accent-hover: #4338ca;
-    --glass-bg: rgba(255, 255, 255, 0.65);
-    --glass-border: rgba(255, 255, 255, 0.4);
-    --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
-    --danger: #ef4444;
-    --success: #10b981;
-    --radius: 12px;
-  }
+/* --- PREMIUM MODERN UI (Clean, High-Contrast, Professional) --- */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg-main: #f1f5f9;
+  --surface: rgba(255, 255, 255, 0.85);
+  --surface-solid: #ffffff;
+  --primary: #4f46e5;
+  --primary-hover: #4338ca;
+  --primary-light: rgba(79, 70, 229, 0.1);
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --text-light: #94a3b8;
+  --border: rgba(203, 213, 225, 0.6);
+  --border-focus: #818cf8;
+  --success: #10b981;
+  --success-bg: rgba(16, 185, 129, 0.1);
+  --warning: #f59e0b;
+  --warning-bg: rgba(245, 158, 11, 0.1);
+  --danger: #ef4444;
+  --danger-bg: rgba(239, 68, 68, 0.1);
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
+  --radius-sm: 8px; --radius-md: 12px; --radius-lg: 16px; --radius-pill: 9999px;
+}
 
-  * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-  
-  body { 
-    background: linear-gradient(135deg, #e2e8f0 0%, #ffffff 100%);
-    color: var(--text-primary);
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-  }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background: var(--bg-main);
+  background-image: radial-gradient(circle at 15% 50%, rgba(79, 70, 229, 0.04), transparent 25%), radial-gradient(circle at 85% 30%, rgba(16, 185, 129, 0.04), transparent 25%);
+  color: var(--text-main);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
 
-  /* Navigation */
-  nav {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 1rem 2rem; background: var(--glass-bg);
-    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--glass-border); position: sticky; top: 0; z-index: 100;
-  }
-  .logo { font-size: 1.5rem; font-weight: 800; color: var(--accent); letter-spacing: -0.5px; }
-  .nav-links { display: flex; gap: 1rem; }
-  .nav-btn {
-    background: none; border: none; font-size: 1rem; font-weight: 600;
-    color: var(--text-secondary); cursor: pointer; padding: 0.5rem 1rem;
-    border-radius: 8px; transition: all 0.2s ease;
-  }
-  .nav-btn:hover { background: rgba(79, 70, 229, 0.1); color: var(--accent); }
-  .nav-btn.active { background: var(--accent); color: white; }
-  .settings-btn { 
-    background: none; border: 1px solid var(--text-secondary); border-radius: 8px; 
-    cursor: pointer; padding: 0.5rem 1rem; font-weight: 600; transition: 0.2s; color: var(--text-primary);
-  }
-  .settings-btn:hover { background: var(--text-primary); color: white; }
+#app { max-width: 1200px; margin: 0 auto; padding: 24px; position: relative; z-index: 1; }
+#mr { position: relative; z-index: 100; }
 
-  /* Main Container & Layout */
-  main { padding: 2rem; max-width: 1200px; margin: 0 auto; width: 100%; flex: 1; }
-  
-  .glass-card {
-    background: var(--glass-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-    border: 1px solid var(--glass-border); border-radius: var(--radius);
-    padding: 2rem; box-shadow: var(--shadow); margin-bottom: 1.5rem;
-    animation: fadeIn 0.3s ease-out;
-  }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+/* Cards & Surfaces */
+.card {
+  background: var(--surface);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
 
-  /* Inputs & Typography */
-  h2 { margin-bottom: 0.5rem; color: var(--text-primary); }
-  p.subtitle { color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 0.95rem; }
-  
-  label { font-weight: 600; font-size: 0.9rem; margin-top: 1rem; display: block; color: var(--text-primary); }
-  textarea, input[type="text"], select {
-    width: 100%; padding: 0.8rem 1rem; border: 1px solid #cbd5e1; border-radius: 8px;
-    font-size: 1rem; margin-top: 0.4rem; transition: all 0.2s; background: rgba(255, 255, 255, 0.8);
-  }
-  textarea:focus, input[type="text"]:focus, select:focus { 
-    outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(79,70,229,0.15); background: #fff;
-  }
-  
-  /* Buttons */
-  .btn-primary {
-    background: var(--accent); color: white; border: none; padding: 0.75rem 1.5rem;
-    border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; gap: 0.5rem;
-  }
-  .btn-primary:hover { background: var(--accent-hover); transform: translateY(-1px); }
-  .btn-secondary { background: #e2e8f0; color: var(--text-primary); border: none; padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.2s; }
-  .btn-secondary:hover { background: #cbd5e1; }
-  .btn-danger { background: #fee2e2; color: var(--danger); border: none; padding: 0.4rem 0.8rem; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 600; }
-  .btn-danger:hover { background: #fecaca; }
+/* Typography */
+h1, h2, h3 { color: var(--text-main); font-weight: 700; letter-spacing: -0.02em; }
+p { line-height: 1.6; }
 
-  /* Tabs */
-  .tab-content { display: none; }
-  .tab-content.active { display: block; }
+/* Buttons */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 10px 20px; border-radius: var(--radius-md); border: none;
+  font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s ease;
+  white-space: nowrap; line-height: 1.2;
+}
+.btn svg { width: 16px; height: 16px; flex-shrink: 0; }
+.btn:active { transform: translateY(1px); }
+.btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
 
-  /* Tracker Table */
-  .table-container { overflow-x: auto; margin-top: 1rem; }
-  table { width: 100%; border-collapse: collapse; background: white; border-radius: var(--radius); overflow: hidden; }
-  th, td { padding: 1rem; text-align: left; border-bottom: 1px solid #e2e8f0; }
-  th { background: #f8fafc; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.5px; }
-  tr:last-child td { border-bottom: none; }
-  tr:hover { background: #f1f5f9; }
-  .status-badge { padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.8rem; font-weight: 600; }
-  .status-applied { background: #dbeafe; color: #1e40af; }
-  .status-interview { background: #fef3c7; color: #b45309; }
-  .status-rejected { background: #fee2e2; color: #991b1b; }
+.bp { background: var(--primary); color: white; box-shadow: var(--shadow-sm); }
+.bp:hover:not(:disabled) { background: var(--primary-hover); box-shadow: var(--shadow-md); }
+.bs { background: white; border: 1px solid var(--border); color: var(--text-main); }
+.bs:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); }
+.bg { background: var(--success); color: white; }
+.bg:hover:not(:disabled) { background: #059669; }
+.br { background: var(--danger-bg); color: var(--danger); border: 1px solid transparent; }
+.br:hover:not(:disabled) { background: var(--danger); color: white; }
 
-  /* Draft Actions Grid */
-  .draft-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1.5rem; }
-  .action-card { background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; text-align: center; }
-  .action-card a { display: block; text-decoration: none; background: var(--text-primary); color: white; padding: 0.5rem; border-radius: 6px; margin-top: 0.5rem; font-weight: 600; transition: 0.2s; }
-  .action-card a:hover { background: var(--accent); }
+.sm { padding: 8px 14px; font-size: 13px; }
+.xs { padding: 6px 10px; font-size: 12px; border-radius: var(--radius-sm); }
 
-  /* Modal */
-  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); z-index: 200; justify-content: center; align-items: center; }
-  .modal-content { background: white; padding: 2rem; border-radius: 16px; width: 90%; max-width: 500px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
-  
-  .loading { display: none; margin-top: 1rem; color: var(--accent); font-weight: 600; }
+/* Inputs */
+.inp {
+  width: 100%; padding: 12px 16px; border-radius: var(--radius-md);
+  border: 1px solid var(--border); background: var(--surface-solid);
+  font-size: 14px; color: var(--text-main); outline: none; transition: all 0.2s;
+}
+.inp:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+.inp.ok { border-color: var(--success); }
+.ta { resize: vertical; line-height: 1.6; }
+
+/* Navigation */
+.nav {
+  display: flex; gap: 4px; background: rgba(255,255,255,0.6);
+  backdrop-filter: blur(12px); border: 1px solid var(--border);
+  padding: 6px; border-radius: var(--radius-lg); margin-bottom: 24px; overflow-x: auto;
+}
+.nb {
+  display: flex; align-items: center; gap: 8px; padding: 10px 18px;
+  border-radius: var(--radius-md); border: none; background: transparent;
+  color: var(--text-muted); cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.2s;
+}
+.nb:hover:not(.on) { background: rgba(255,255,255,0.8); color: var(--text-main); }
+.nb.on { background: var(--primary); color: white; box-shadow: var(--shadow-sm); }
+
+/* Badges & Chips */
+.chip { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: var(--radius-pill); font-size: 12px; font-weight: 600; }
+.cg { background: var(--success-bg); color: #065f46; }
+.ca { background: var(--warning-bg); color: #92400e; }
+.cp { background: var(--primary-light); color: var(--primary); }
+.cr { background: var(--danger-bg); color: #991b1b; }
+
+/* Chat Bubbles */
+.clist { display: flex; flex-direction: column; gap: 16px; }
+.msg { display: flex; gap: 12px; max-width: 85%; }
+.msg.u { align-self: flex-end; flex-direction: row-reverse; }
+.bub { padding: 12px 18px; border-radius: var(--radius-lg); font-size: 14px; line-height: 1.6; }
+.msg.ai .bub { background: white; border: 1px solid var(--border); border-top-left-radius: 4px; }
+.msg.u .bub { background: var(--primary); color: white; border-top-right-radius: 4px; }
+.av { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.msg.ai .av { background: var(--primary-light); color: var(--primary); }
+.msg.u .av { background: var(--border); color: var(--text-muted); }
+
+/* Layouts */
+.g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.g3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.g4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+@media(max-width: 768px) { .g3, .g4 { grid-template-columns: 1fr 1fr; } .g2 { grid-template-columns: 1fr; } }
+
+/* Stats & Score Rings */
+.stat { background: white; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 20px; text-align: center; }
+.sv { font-size: 32px; font-weight: 800; color: var(--primary); line-height: 1; }
+.sl { font-size: 13px; color: var(--text-muted); margin-top: 8px; font-weight: 500; }
+.sr { border-radius: 50%; border: 4px solid; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 80px; height: 80px; flex-shrink: 0; }
+
+/* Tracker Kanban */
+.kanban { display: grid; grid-template-columns: repeat(5, minmax(200px, 1fr)); gap: 16px; padding-bottom: 12px; }
+.kcol { background: rgba(255,255,255,0.4); border: 1px dashed var(--border); border-radius: var(--radius-md); padding: 12px; min-height: 300px; }
+.kcard { background: white; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 14px; margin-bottom: 10px; cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow-sm); }
+.kcard:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); border-color: var(--border-focus); }
+
+/* Utilities */
+.spin { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: currentColor; border-radius: 50%; animation: sp .6s linear infinite; display: inline-block; vertical-align: middle; }
+.spin-p { width: 32px; height: 32px; border-width: 3px; border-color: var(--primary-light); border-top-color: var(--primary); }
+@keyframes sp { to { transform: rotate(360deg) } }
+.fu { animation: fadeUp 0.3s ease both; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(10px) } to { opacity: 1; transform: translateY(0) } }
+::-webkit-scrollbar { width: 6px; height: 6px; } ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+
+pre.code { font-family: 'SF Mono', Consolas, monospace; font-size: 13px; background: #1e293b; color: #f8fafc; padding: 16px; border-radius: var(--radius-md); overflow-x: auto; }
 </style>
 </head>
 <body>
+<div id="app"></div>
+<div id="mr"></div>
 
-  <nav>
-    <div class="logo">JobAI Pro</div>
-    <div class="nav-links">
-      <button class="nav-btn active" onclick="switchTab('analyzer')">Resume Analyzer</button>
-      <button class="nav-btn" onclick="switchTab('jobs')">Job Search</button>
-      <button class="nav-btn" onclick="switchTab('tracker')">Application Tracker</button>
-    </div>
-    <button class="settings-btn" onclick="openSettings()">⚙️ Settings</button>
-  </nav>
+<script>
+// ── FAIL-SAFE ERROR HANDLER ──
+window.addEventListener('error', function(e){
+  const app = document.getElementById('app');
+  if(app) app.innerHTML = `<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;"><div class="card" style="padding:40px;max-width:480px;text-align:center"><h2 style="color:var(--danger);margin-bottom:12px;">App Error</h2><p style="color:var(--text-muted);font-size:14px;margin-bottom:24px;">${e.message}</p><button onclick="localStorage.clear();location.reload()" class="btn bp">Reset Application</button></div></div>`;
+});
 
-  <main>
-    <div id="tab-analyzer" class="tab-content active">
-      <div class="glass-card">
-        <h2>Smart Resume Analyzer</h2>
-        <p class="subtitle">Match your profile precisely against job requirements. No AI hallucinations.</p>
-        
-        <label>Job Description</label>
-        <textarea id="jd-input" rows="5" placeholder="Paste the exact Job Description here..."></textarea>
-        
-        <label>Your Profile / Resume Text</label>
-        <textarea id="profile-input" rows="5" placeholder="Paste your resume text here (PDF/Word drop support handled by Phase 2 backend)..."></textarea>
-        
-        <div style="margin-top: 1.5rem;">
-          <button class="btn-primary" onclick="runAnalysis()">Analyze Match</button>
+// ── PROXY DETECTION (For secure Vercel deployment) ──
+const PROXY = window.location.protocol === 'https:' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+
+// ── SVG ICONS ──
+const svg = (d,w=18,h=18) => `<svg width="${w}" height="${h}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
+const I = {
+  home:     svg('<path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/>'),
+  search:   svg('<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>'),
+  brain:    svg('<path d="M9.5 2A2.5 2.5 0 0112 4.5v15a2.5 2.5 0 01-4.96-.44 2.5 2.5 0 01-2.96-3.08 3 3 0 01-.34-5.58 2.5 2.5 0 011.32-4.24 2.5 2.5 0 011.98-3A2.5 2.5 0 019.5 2z"/><path d="M14.5 2A2.5 2.5 0 0112 4.5v15a2.5 2.5 0 004.96-.44 2.5 2.5 0 002.96-3.08 3 3 0 00.34-5.58 2.5 2.5 0 00-1.32-4.24 2.5 2.5 0 00-1.98-3A2.5 2.5 0 0014.5 2z"/>'),
+  list:     svg('<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>'),
+  mail:     svg('<rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7L12 13 2 7"/>'),
+  user:     svg('<path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>'),
+  settings: svg('<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>'),
+  check:    svg('<polyline points="20,6 9,17 4,12"/>'),
+  trash:    svg('<polyline points="3,6 5,6 21,6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>'),
+  download: svg('<path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/>'),
+  copy:     svg('<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>'),
+  upload:   svg('<path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17,8 12,3 7,8"/><line x1="12" y1="3" x2="12" y2="15"/>'),
+  file:     svg('<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/>'),
+  send:     svg('<line x1="22" y1="2" x2="11" y2="13"/><polygon points="22,2 15,22 11,13 2,9"/>'),
+  link:     svg('<path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/>'),
+  plus:     svg('<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>'),
+  key:      svg('<path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 11-7.778 7.778 5.5 5.5 0 017.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>')
+};
+
+// ── STATE & STORAGE (LocalDB) ──
+const S = {
+  gKey:'', rKey:'', model:'gemini-2.0-flash-lite',
+  profile:null, cv:'', chat:[], jobs:[], apps:[],
+  tab:'dash', step:0, busy:false,
+  jd:null, drafts:{}, draftCtx:{}, lastQ:'', lastL:'Bengaluru', resumeOutput:null
+};
+
+const DB = {
+  set(k,v){ try{localStorage.setItem('jai3_'+k, typeof v==='string'?v:JSON.stringify(v));return true}catch{return false} },
+  get(k,fb=null){ try{const r=localStorage.getItem('jai3_'+k);return r===null?fb:JSON.parse(r)}catch{return fb} },
+  clear(){ try{Object.keys(localStorage).filter(k=>k.startsWith('jai3_')).forEach(k=>localStorage.removeItem(k))}catch{} }
+};
+
+function save(){
+  DB.set('gk',S.gKey); DB.set('rk',S.rKey); DB.set('mod',S.model);
+  DB.set('cv',S.cv.slice(0,9000)); DB.set('pf',S.profile); DB.set('ap',S.apps); DB.set('ch',S.chat.slice(-30));
+}
+
+function load(){
+  S.gKey = DB.get('gk',''); S.rKey = DB.get('rk',''); S.model = DB.get('mod','gemini-2.0-flash-lite');
+  S.cv = DB.get('cv',''); S.profile = DB.get('pf',null); S.apps = DB.get('ap',[]); S.chat = DB.get('ch',[]);
+}
+
+// ── UTILS ──
+const uid = () => Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const today= () => new Date().toISOString().split('T')[0];
+const fd2 = s => s ? new Date(s).toLocaleDateString('en-IN',{day:'numeric',month:'short'}) : '—';
+const scC = n => n>=75?'var(--success)':n>=50?'var(--warning)':'var(--danger)';
+const scBg = n => n>=75?'var(--success-bg)':n>=50?'var(--warning-bg)':'var(--danger-bg)';
+const scCl = n => n>=75?'cg':n>=50?'ca':'cr';
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
+function md(s){ return String(s||'').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>') }
+function dlBlob(content, name, type='text/plain'){
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([content],{type}));
+  a.download=name; a.click();
+}
+function copyText(t,btn){
+  navigator.clipboard.writeText(t).then(()=>{
+    if(btn){const o=btn.innerHTML;btn.innerHTML=I.check+' Copied!';setTimeout(()=>btn.innerHTML=o,2000);}
+  });
+}
+
+// ── API HANDLERS (With Secure Sandbox Mode logic) ──
+async function callGemini(contents, temp=0.7, maxTok=2048) {
+  const body = { contents, generationConfig: { temperature: temp, maxOutputTokens: maxTok } };
+  const headers = { 'Content-Type': 'application/json' };
+  
+  // If deployed on Vercel, pass custom keys in headers so backend can override
+  if (PROXY) {
+    if (S.gKey) headers['x-user-gemini-key'] = S.gKey;
+  }
+
+  const url = PROXY ? '/api/gemini' : `https://generativelanguage.googleapis.com/v1beta/models/${S.model}:generateContent?key=${S.gKey}`;
+  
+  const r = await fetch(url, { method: 'POST', headers, body: JSON.stringify(body) });
+  if(!r.ok){ const e = await r.json().catch(()=>({})); throw new Error(e.error?.message || e.error || 'Gemini API error '+r.status); }
+  
+  const d = await r.json();
+  return d.candidates?.[0]?.content?.parts?.[0]?.text || '';
+}
+
+async function gem(p, temp=0.7, max=2048) { return callGemini([{role:'user',parts:[{text:p}]}], temp, max); }
+
+async function jsearch(q, loc) {
+  const enc = encodeURIComponent(q + ' ' + loc);
+  const headers = {};
+  
+  if (PROXY) {
+    if (S.rKey) headers['x-user-search-key'] = S.rKey; // Tell backend to use user's RapidAPI key if provided
+  } else {
+    headers['X-RapidAPI-Key'] = S.rKey;
+    headers['X-RapidAPI-Host'] = 'jsearch.p.rapidapi.com';
+  }
+
+  const url = PROXY ? `/api/jsearch?query=${enc}&page=1&num_pages=2&date_posted=week` : `https://jsearch.p.rapidapi.com/search?query=${enc}&page=1&num_pages=2&date_posted=week`;
+  
+  const r = await fetch(url, { headers });
+  if(!r.ok){ const e = await r.json().catch(()=>({})); throw new Error(e.message || e.error || 'JSearch error '+r.status); }
+  
+  return (await r.json()).data || [];
+}
+
+function pJSON(t) {
+  const c = t.replace(/```json|```/g,'').trim();
+  const ci = c.indexOf('{'), di = c.lastIndexOf('}'), ai = c.indexOf('['), bi = c.lastIndexOf(']');
+  if(ai !== -1 && bi !== -1 && (ci === -1 || ai < ci)) return JSON.parse(c.slice(ai, bi+1));
+  if(ci !== -1 && di !== -1) return JSON.parse(c.slice(ci, di+1));
+  throw new Error('No JSON found');
+}
+
+// ── RENDER ENGINE ──
+function render(){
+  const app = document.getElementById('app');
+  if(!app) return;
+  const needKey = !PROXY && !S.gKey;
+  const needCV  = !S.profile;
+  
+  if(needKey || needCV) { app.innerHTML = renderSetup(); } 
+  else { app.innerHTML = renderApp(); }
+  
+  bindEvents();
+}
+
+// ── SETUP & ONBOARDING ──
+function renderSetup(){
+  if(!PROXY && !S.gKey || S.step===0) {
+    return `
+    <div style="min-height:90vh;display:flex;align-items:center;justify-content:center;">
+      <div style="width:100%;max-width:480px">
+        <div style="text-align:center;margin-bottom:32px">
+          <h1 style="font-size:32px;color:var(--primary);margin-bottom:8px;">JobAI Pro</h1>
+          <p style="color:var(--text-muted);">Intelligent Career Automation</p>
         </div>
-        <div id="analyze-loading" class="loading">⏳ AI is processing exact date math and skill extraction...</div>
+        <div class="card" style="padding:32px">
+          ${PROXY ? `<div style="padding:12px;background:var(--success-bg);color:var(--success);border-radius:var(--radius-md);margin-bottom:20px;font-size:13px;">${I.check} Secure Proxy Mode Active</div>` : ''}
+          <div style="margin-bottom:20px">
+            <label style="font-size:13px;font-weight:600;display:flex;justify-content:space-between">Gemini API Key <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:var(--primary);text-decoration:none;">Get Key →</a></label>
+            <input class="inp" id="i-gk" type="password" placeholder="AIzaSy..." value="${esc(S.gKey)}" style="margin-top:8px;">
+          </div>
+          <div style="margin-bottom:24px">
+            <label style="font-size:13px;font-weight:600;display:flex;justify-content:space-between">RapidAPI Key (Optional) <a href="https://rapidapi.com/letscrape-6bRBa3QguO5/api/jsearch" target="_blank" style="color:var(--primary);text-decoration:none;">Get Key →</a></label>
+            <input class="inp" id="i-rk" type="password" placeholder="For live Job Search feature..." value="${esc(S.rKey)}" style="margin-top:8px;">
+          </div>
+          <button class="btn bp" id="s0" style="width:100%;padding:14px;font-size:15px;">Save & Continue ${I.send}</button>
+        </div>
       </div>
-
-      <div id="analysis-results" class="glass-card" style="display: none;">
-        <h2>Analysis Results</h2>
-        <div id="results-content" style="white-space: pre-wrap; font-size: 0.95rem; line-height: 1.6; margin-bottom: 1.5rem;"></div>
-        
-        <hr style="border: 0; border-top: 1px solid var(--glass-border); margin: 1.5rem 0;">
-        
-        <h2>Generate Outreach Drafts</h2>
-        <p class="subtitle">Use the analysis to automatically generate tailored outreach messages.</p>
-        <button class="btn-secondary" onclick="generateDrafts()">Create Cold Emails & LinkedIn DMs</button>
-        <div id="drafts-loading" class="loading">⏳ Writing highly tailored drafts...</div>
-        
-        <div id="draft-results" class="draft-actions" style="display: none;">
-          <div class="action-card">
-            <h3>Cold Email</h3>
-            <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Send direct to Recruiter</p>
-            <a id="btn-email" href="#" target="_blank">Open in Gmail</a>
+    </div>`;
+  }
+  
+  if(S.step===1) {
+    return `
+    <div style="min-height:90vh;display:flex;align-items:center;justify-content:center;">
+      <div style="width:100%;max-width:600px">
+        <div style="text-align:center;margin-bottom:24px"><h2 style="font-size:24px;">Upload your CV</h2><p style="color:var(--text-muted);margin-top:8px;">Paste your text below to initialize your career profile.</p></div>
+        <div class="card" style="padding:24px">
+          <textarea class="inp ta" id="cv-ta" placeholder="Paste your complete CV / resume here..." style="min-height:300px;margin-bottom:16px;">${esc(S.cv)}</textarea>
+          <button class="btn bp" id="s1" style="width:100%;padding:14px;">${S.busy ? '<span class="spin"></span> Processing...' : 'Analyze CV'}</button>
+        </div>
+      </div>
+    </div>`;
+  }
+  
+  return `
+    <div style="min-height:90vh;display:flex;align-items:center;justify-content:center;">
+      <div style="width:100%;max-width:640px">
+        <div class="card" style="overflow:hidden">
+          <div style="padding:16px 24px;background:var(--bg-main);border-bottom:1px solid var(--border);font-weight:700;">Profile Setup Assistant</div>
+          <div id="cb" class="clist" style="padding:24px;height:400px;overflow-y:auto">
+            ${S.chat.map(m=>`<div class="msg ${m.r==='ai'?'ai':'u'}"><div class="av">${m.r==='ai'?I.brain:I.user}</div><div class="bub">${md(esc(m.t))}</div></div>`).join('')}
+            ${S.busy ? `<div class="msg ai"><div class="av">${I.brain}</div><div class="bub"><span class="spin"></span></div></div>` : ''}
           </div>
-          <div class="action-card">
-            <h3>LinkedIn DM</h3>
-            <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Short & Punchy</p>
-            <a id="btn-linkedin" href="https://www.linkedin.com/messaging/" target="_blank">Copy & Open LinkedIn</a>
-          </div>
-          <div class="action-card">
-            <h3>WhatsApp HR</h3>
-            <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.5rem;">For direct referrals</p>
-            <a id="btn-whatsapp" href="#" target="_blank">Open WhatsApp</a>
+          <div style="padding:16px;border-top:1px solid var(--border);display:flex;gap:12px;">
+            <input class="inp" id="ci" placeholder="Type answer..." style="flex:1" ${S.busy?'disabled':''}>
+            <button class="btn bp" id="cs" ${S.busy?'disabled':''}>${I.send}</button>
           </div>
         </div>
       </div>
-    </div>
+    </div>`;
+}
 
-    <div id="tab-jobs" class="tab-content">
-      <div class="glass-card">
-        <h2>Job Hunter Aggregator</h2>
-        <p class="subtitle">Connects to Adzuna/Jooble to bypass strict rate limits. (Backend integration required)</p>
-        <div style="display: flex; gap: 1rem;">
-          <input type="text" id="job-search-query" placeholder="e.g. Product Manager in Bengaluru" style="flex: 1;">
-          <button class="btn-primary">Search Jobs</button>
-        </div>
-      </div>
-    </div>
-
-    <div id="tab-tracker" class="tab-content">
-      <div class="glass-card">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-          <div>
-            <h2>Application Tracker</h2>
-            <p class="subtitle">Locally stored offline database. Instant updates.</p>
-          </div>
-          <button class="btn-secondary" onclick="exportCSV()">⬇️ Export CSV</button>
-        </div>
-        
-        <div style="display: grid; grid-template-columns: 2fr 2fr 1fr auto; gap: 1rem; align-items: end; background: rgba(255,255,255,0.5); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
-          <div>
-            <label style="margin-top: 0;">Company Name</label>
-            <input type="text" id="track-company" placeholder="e.g. Tracxn">
-          </div>
-          <div>
-            <label style="margin-top: 0;">Role</label>
-            <input type="text" id="track-role" placeholder="e.g. Internal PM">
-          </div>
-          <div>
-            <label style="margin-top: 0;">Status</label>
-            <select id="track-status">
-              <option value="Applied">Applied</option>
-              <option value="Interviewing">Interviewing</option>
-              <option value="Rejected">Rejected</option>
-            </select>
-          </div>
-          <button class="btn-primary" onclick="addJobToTracker()" style="margin-top:0;">Add Job</button>
-        </div>
-
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>Company</th>
-                <th>Role</th>
-                <th>Date Saved</th>
-                <th>Status</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody id="tracker-body">
-              </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  </main>
-
-  <div class="modal-overlay" id="settings-modal">
-    <div class="modal-content">
-      <h2 style="margin-bottom: 0.5rem;">Client-Side Configuration</h2>
-      <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1.5rem;">
-        Provide your own API keys. Data saves locally. Leave blank to fallback to server env variables.
-      </p>
-      
-      <label>Personal Gemini Key</label>
-      <input type="text" id="setting-gemini" placeholder="AIzaSy...">
-      
-      <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem;">
-        <button class="btn-secondary" onclick="closeSettings()">Cancel</button>
-        <button class="btn-primary" onclick="saveSettings()">Save Locally</button>
-      </div>
+// ── MAIN APPLICATION ──
+function renderApp(){
+  const tabs = [
+    {id:'dash', l:'Dashboard', ic:I.home}, {id:'hunt', l:'Job Hunt', ic:I.search}, {id:'analyze', l:'Analyzer', ic:I.brain},
+    {id:'tracker', l:'Tracker', ic:I.list}, {id:'drafts', l:'Drafts', ic:I.mail}, {id:'resume', l:'Resume', ic:I.file}, {id:'profile', l:'Profile', ic:I.user}
+  ];
+  
+  const body = {dash:tDash, hunt:tHunt, analyze:tAnalyze, tracker:tTracker, drafts:tDrafts, resume:tResume, profile:tProfile}[S.tab]?.() || '';
+  
+  return `
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+    <h1 style="font-size:24px;color:var(--primary);">JobAI <span style="color:var(--text-main);font-weight:500;">Pro</span></h1>
+    <div style="display:flex;gap:12px;">
+      <button class="btn bs sm" onclick="openSettings()">${I.settings} Settings</button>
     </div>
   </div>
+  <div class="nav">${tabs.map(t=>`<button class="nb ${S.tab===t.id?'on':''}" data-t="${t.id}">${t.ic}${t.l}</button>`).join('')}</div>
+  <div class="fu">${body}</div>`;
+}
 
-  <script>
-    // ==========================================
-    // 1. STATE MANAGEMENT (LOCAL STORAGE)
-    // ==========================================
-    const STATE = {
-      geminiKey: localStorage.getItem('jobai_gemini_key') || '',
-      trackerData: JSON.parse(localStorage.getItem('jobai_tracker_v2')) || []
-    };
+function tDash() {
+  return `<div class="g4" style="margin-bottom:24px;">
+    <div class="stat"><div class="sv">${S.apps.length}</div><div class="sl">Total Tracked</div></div>
+    <div class="stat"><div class="sv" style="color:var(--success)">${S.apps.filter(a=>a.status==='interview').length}</div><div class="sl">Interviews</div></div>
+    <div class="stat"><div class="sv" style="color:var(--primary)">${S.profile?.yearsExp||0}</div><div class="sl">Years Exp</div></div>
+    <div class="stat"><div class="sv" style="color:var(--warning)">${S.apps.filter(a=>a.status==='saved').length}</div><div class="sl">Saved Jobs</div></div>
+  </div>
+  <div class="card" style="padding:48px;text-align:center;">
+    <div style="color:var(--border);margin-bottom:16px;">${svg('<circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/>',48,48)}</div>
+    <h3 style="margin-bottom:12px;">Ready for your next application?</h3>
+    <div style="display:flex;justify-content:center;gap:16px;margin-top:24px;">
+      <button class="btn bp" onclick="goTab('hunt')">${I.search} Search Jobs</button>
+      <button class="btn bs" onclick="goTab('analyze')">${I.brain} Analyze a JD</button>
+    </div>
+  </div>`;
+}
 
-    function saveTrackerState() {
-      localStorage.setItem('jobai_tracker_v2', JSON.stringify(STATE.trackerData));
-      renderTracker();
-    }
+function tHunt() {
+  return `<div class="card" style="padding:24px;">
+    <h2 style="margin-bottom:8px;display:flex;align-items:center;gap:8px;">${I.search} Live Job Aggregator</h2>
+    <p style="color:var(--text-muted);margin-bottom:24px;">Searches internet and auto-scores against your profile.</p>
+    <div class="g2" style="margin-bottom:16px;">
+      <input class="inp" id="sq" placeholder="Keywords (e.g. Product Manager)" value="${esc(S.lastQ)}">
+      <input class="inp" id="sl" placeholder="Location (e.g. Bengaluru)" value="${esc(S.lastL)}">
+    </div>
+    <button class="btn bp" id="hunt-btn">${S.busy&&!S.jobs.length?'<span class="spin"></span> Searching...':'Search Jobs'}</button>
+  </div>
+  <div style="margin-top:24px;">${S.jobs.map(j=>`
+    <div class="card" style="padding:16px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;">
+      <div><h3 style="font-size:16px;margin-bottom:4px;">${esc(j.job_title)}</h3><p style="color:var(--text-muted);font-size:13px;">${esc(j.employer_name)}</p></div>
+      <div class="sr" style="border-color:${scC(j.score)};width:60px;height:60px;"><span style="font-weight:700;color:${scC(j.score)}">${j.score}%</span></div>
+    </div>`).join('')}
+  </div>`;
+}
 
-    // ==========================================
-    // 2. UI & TAB LOGIC
-    // ==========================================
-    function switchTab(tabId) {
-      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-      document.getElementById(`tab-${tabId}`).classList.add('active');
-      event.target.classList.add('active');
-      if(tabId === 'tracker') renderTracker();
-    }
+function tAnalyze() {
+  return `<div class="card" style="padding:24px;">
+    <h2 style="margin-bottom:8px;display:flex;align-items:center;gap:8px;">${I.brain} Job Description Analyzer</h2>
+    <p style="color:var(--text-muted);margin-bottom:16px;">Paste a JD. AI will do exact date math and gap analysis without hallucinating.</p>
+    <textarea class="inp ta" id="jd-ta" placeholder="Paste full Job Description here..." style="min-height:150px;margin-bottom:16px;"></textarea>
+    <button class="btn bp" id="analyze-btn">${S.busy&&!S.jd?'<span class="spin"></span> Analyzing...':'Analyze Match'}</button>
+  </div>
+  ${S.jd ? `<div class="card" style="padding:24px;margin-top:24px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <h3>${esc(S.jd.roleName)} at ${esc(S.jd.company)}</h3>
+      <span class="chip ${scCl(S.jd.score)}">${S.jd.score}% Match</span>
+    </div>
+    <p style="background:var(--bg-main);padding:12px;border-radius:var(--radius-sm);margin-bottom:16px;font-size:14px;">${esc(S.jd.verdict)}</p>
+    <div style="display:flex;gap:12px;"><button class="btn bp sm" onclick="draftFromJD()">${I.mail} Auto-Draft Outreach</button></div>
+  </div>` : ''}`;
+}
 
-    function openSettings() {
-      document.getElementById('setting-gemini').value = STATE.geminiKey;
-      document.getElementById('settings-modal').style.display = 'flex';
-    }
+function tTracker() {
+  const cols = [{id:'saved',l:'Saved'}, {id:'applied',l:'Applied'}, {id:'interview',l:'Interview'}, {id:'offer',l:'Offer'}];
+  return `<div style="display:flex;justify-content:space-between;margin-bottom:16px;">
+    <h2>Application Tracker</h2>
+    <button class="btn bs sm" onclick="exportCSV()">${I.download} Export CSV</button>
+  </div>
+  <div class="kanban">
+    ${cols.map(c=>`<div class="kcol"><h3 style="font-size:14px;color:var(--text-muted);margin-bottom:12px;text-transform:uppercase;">${c.l}</h3>
+      ${S.apps.filter(a=>a.status===c.id).map(a=>`<div class="kcard" onclick="delApp('${a.id}')"><strong style="font-size:14px;">${esc(a.role)}</strong><p style="font-size:12px;color:var(--text-muted);">${esc(a.company)}</p></div>`).join('')}
+    </div>`).join('')}
+  </div>`;
+}
 
-    function closeSettings() {
-      document.getElementById('settings-modal').style.display = 'none';
-    }
+function tDrafts() {
+  const d = S.drafts || {};
+  return `<div class="card" style="padding:24px;margin-bottom:24px;">
+    <h2 style="margin-bottom:16px;">Outreach Auto-Drafter</h2>
+    <div class="g2" style="margin-bottom:16px;">
+      <input class="inp" id="d-co" placeholder="Company" value="${esc(S.draftCtx.co||'')}">
+      <input class="inp" id="d-ro" placeholder="Role" value="${esc(S.draftCtx.ro||'')}">
+    </div>
+    <button class="btn bp" id="draft-btn">${S.busy&&!Object.keys(d).length?'<span class="spin"></span> Drafting...':'Generate Outreach Package'}</button>
+  </div>
+  ${Object.keys(d).length ? `<div class="g2">
+    ${Object.entries(d).map(([type, data]) => {
+      let actionBtn = '';
+      if(type==='cold') actionBtn = `<a href="mailto:?subject=${encodeURIComponent(data.sub)}&body=${encodeURIComponent(data.body)}" class="btn bp xs">${I.mail} Open Email</a>`;
+      if(type==='whatsapp') actionBtn = `<a href="https://wa.me/?text=${encodeURIComponent(data.body)}" target="_blank" class="btn bg xs">WhatsApp</a>`;
+      if(type==='linkedin') actionBtn = `<a href="https://linkedin.com/messaging" target="_blank" class="btn bp xs">Open LinkedIn</a>`;
+      return `<div class="card" style="padding:16px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:12px;"><strong>${type.toUpperCase()}</strong> ${actionBtn}</div>
+        <pre class="code" style="white-space:pre-wrap;">${esc(data.body)}</pre>
+      </div>`;
+    }).join('')}
+  </div>` : ''}`;
+}
 
-    function saveSettings() {
-      STATE.geminiKey = document.getElementById('setting-gemini').value.trim();
-      localStorage.setItem('jobai_gemini_key', STATE.geminiKey);
-      closeSettings();
-    }
+function tResume() {
+  return `<div class="card" style="padding:24px;">
+    <h2 style="margin-bottom:16px;">Resume Generator (LaTeX & HTML)</h2>
+    <button class="btn bp" id="gen-res-btn">${S.busy&&!S.resumeOutput?'<span class="spin"></span> Generating...':'Generate Tailored Resume'}</button>
+    ${S.resumeOutput ? `<div style="margin-top:24px;">
+      <h3 style="margin-bottom:12px;">LaTeX Source Code</h3>
+      <pre class="code" style="max-height:300px;">${esc(S.resumeOutput.latex)}</pre>
+    </div>` : ''}
+  </div>`;
+}
 
-    // ==========================================
-    // 3. CORE API WRAPPER (Hybrid Vercel Call)
-    // ==========================================
-    async function fetchAI(promptText) {
-      const payload = {
-        contents: [{ role: "user", parts: [{ text: promptText }] }],
-        generationConfig: { temperature: 0.2 } // Low temp for logic/math
-      };
+function tProfile() {
+  const p = S.profile;
+  if(!p) return `<p>No profile</p>`;
+  return `<div class="card" style="padding:24px;"><h2 style="margin-bottom:8px;">${esc(p.name)}</h2><p style="color:var(--text-muted);margin-bottom:16px;">${esc(p.currentRole)} · ${p.yearsExp} YOE</p>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;">${(p.skills||[]).map(s=>`<span class="chip cp">${esc(s)}</span>`).join('')}</div></div>`;
+}
 
-      try {
-        const response = await fetch('/api/gemini', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-user-gemini-key': STATE.geminiKey // Client override header
-          },
-          body: JSON.stringify(payload)
-        });
-
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.error || 'API Failed');
-        return data.candidates[0].content.parts[0].text;
-      } catch (err) {
-        console.error(err);
-        alert(`Error connecting to AI: ${err.message}`);
-        return null;
-      }
-    }
-
-    // ==========================================
-    // 4. ANALYZER LOGIC (Anti-Hallucination)
-    // ==========================================
-    let lastAnalysisText = ""; // Store for drafting
-
-    async function runAnalysis() {
-      const jd = document.getElementById('jd-input').value.trim();
-      const profile = document.getElementById('profile-input').value.trim();
-      
-      if (!jd || !profile) return alert("Please paste both JD and Profile.");
-
-      document.getElementById('analysis-results').style.display = 'block';
-      document.getElementById('analyze-loading').style.display = 'block';
-      document.getElementById('results-content').innerHTML = '';
-      document.getElementById('draft-results').style.display = 'none';
-
-      // STRICT PROMPT ENGINEERING (Point 4 fix)
-      const prompt = `
-      You are an expert ATS parser and technical recruiter. Analyze the Profile against the Job Description (JD).
-      CRITICAL RULES:
-      1. DO NOT HALLUCINATE. Only extract skills explicitly written in the Profile text.
-      2. If you must calculate experience years, use exact date math based on the profile's dates. If dates are missing or gaps exist, state "Unable to calculate exact dates".
-      3. Provide: 
-         - A Match Score (%)
-         - Missing Keywords (from JD not in Profile)
-         - 3 specific resume tweaks.
-      
-      JD:
-      ${jd}
-      
-      PROFILE:
-      ${profile}
-      `;
-
-      const result = await fetchAI(prompt);
-      document.getElementById('analyze-loading').style.display = 'none';
-
-      if (result) {
-        lastAnalysisText = result;
-        document.getElementById('results-content').innerText = result;
-      }
-    }
-
-    // ==========================================
-    // 5. DIRECT ACTION DRAFTS (Points 9 & 10)
-    // ==========================================
-    async function generateDrafts() {
-      if (!lastAnalysisText) return alert("Run analysis first!");
-      
-      document.getElementById('drafts-loading').style.display = 'block';
-      document.getElementById('draft-results').style.display = 'none';
-
-      const prompt = `Based on this analysis: ${lastAnalysisText}. Write two things clearly separated:
-      1. A short cold email to a recruiter highlighting match.
-      2. A very brief 300-character LinkedIn DM.`;
-
-      const drafts = await fetchAI(prompt);
-      document.getElementById('drafts-loading').style.display = 'none';
-
-      if (drafts) {
-        // Simple heuristic to split for demo purposes. AI should format well.
-        const encodedEmail = encodeURIComponent(drafts + "\n\nBest,\n[Your Name]");
-        
-        document.getElementById('btn-email').href = `mailto:recruiter@company.com?subject=Application&body=${encodedEmail}`;
-        
-        // WhatsApp URL formatting
-        const encodedWa = encodeURIComponent("Hi, I applied for the role and would love to connect! " + drafts.substring(0,100));
-        document.getElementById('btn-whatsapp').href = `https://wa.me/?text=${encodedWa}`;
-
-        // Save to clipboard feature for LinkedIn
-        document.getElementById('btn-linkedin').onclick = (e) => {
-          navigator.clipboard.writeText(drafts);
-          alert("Draft copied to clipboard! Opening LinkedIn...");
-        };
-
-        document.getElementById('draft-results').style.display = 'grid';
-      }
-    }
-
-    // ==========================================
-    // 6. TRACKER LOGIC (Instant Reload & CSV)
-    // ==========================================
-    function renderTracker() {
-      const tbody = document.getElementById('tracker-body');
-      tbody.innerHTML = '';
-
-      if (STATE.trackerData.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color: var(--text-secondary);">No applications tracked yet.</td></tr>`;
-        return;
-      }
-
-      STATE.trackerData.forEach((job, index) => {
-        let badgeClass = 'status-applied';
-        if(job.status === 'Interviewing') badgeClass = 'status-interview';
-        if(job.status === 'Rejected') badgeClass = 'status-rejected';
-
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td style="font-weight: 600;">${job.company}</td>
-          <td>${job.role}</td>
-          <td style="color: var(--text-secondary);">${job.date}</td>
-          <td><span class="status-badge ${badgeClass}">${job.status}</span></td>
-          <td>
-            <button class="btn-danger" onclick="deleteJob(${index})">Delete</button>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    function addJobToTracker() {
-      const company = document.getElementById('track-company').value.trim();
-      const role = document.getElementById('track-role').value.trim();
-      const status = document.getElementById('track-status').value;
-
-      if(!company || !role) return alert("Company and Role required.");
-
-      STATE.trackerData.push({
-        company, role, status,
-        date: new Date().toLocaleDateString()
-      });
-
-      document.getElementById('track-company').value = '';
-      document.getElementById('track-role').value = '';
-      
-      saveTrackerState(); // Instantly updates UI
-    }
-
-    function deleteJob(index) {
-      if(confirm("Delete this application?")) {
-        STATE.trackerData.splice(index, 1);
-        saveTrackerState(); // Instantly updates UI, no refresh needed!
-      }
-    }
-
-    function exportCSV() {
-      if(STATE.trackerData.length === 0) return alert("Nothing to export!");
-      
-      let csvContent = "data:text/csv;charset=utf-8,Company,Role,Status,Date\n";
-      STATE.trackerData.forEach(row => {
-        csvContent += `"${row.company}","${row.role}","${row.status}","${row.date}"\n`;
-      });
-
-      const encodedUri = encodeURI(csvContent);
-      const link = document.createElement("a");
-      link.setAttribute("href", encodedUri);
-      link.setAttribute("download", "JobAI_Tracker.csv");
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
-
-    // Initial render
-    renderTracker();
-  </script>
-</body>
-</html>
+// ── SETTINGS ──
+function openSettings() {
+  document.getElementById('mr').innerHTML = `<div style="position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:999;"><div class="card" style="padding:32px;width:400px;">
+    <h2 style="margin-bottom:16px;">API Settings</h2>
+    <input class="inp" id="cfg-gk" type="password" placeholder="Gemini API Key" value="${esc(S.gKey)}" style="margin-bottom:12px;">
+    <input class="inp" id="cfg-rk" type="password" placeholder="RapidAPI Key" value="${esc(S.rKey)}" style="margin-bottom:24px;">
+    <div style="display:flex;gap:12px;"><button class="btn bs" onclick="document.getElementById('mr').innerHTML=''">Cancel</button><button class="btn bp" onclick="S
