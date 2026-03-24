@@ -411,7 +411,7 @@ async function callGemini(contents, temp, maxTok) {
 
 async function gem(prompt, temp, max) { return callGemini([{role:'user', parts:[{text:prompt}]}], temp, max); }
 
-async function gemChat(userMsg, system, history) {
+async function geminiChat(userMsg, system, history) {
   history = history || [];
   var c = [];
   if (system) { c.push({role:'user', parts:[{text:system}]}); c.push({role:'model', parts:[{text:'Understood.'}]}); }
