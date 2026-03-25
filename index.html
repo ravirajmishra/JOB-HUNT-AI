@@ -268,7 +268,7 @@ var IC = {
    STATE
    ════════════════════════════════════════════════════════════ */
 var S = {
-  gKey: '', rKey: '', model: 'gemini-2.0-flash-lite',
+  gKey: '', rKey: '', adzunaKey: '', joobleKey: '', apifyKey: '', model: 'gemini-2.0-flash-lite',
   profile: null, cv: '', chat: [],
   jobs: [], apps: [], tab: 'dash',
   step: 0, busy: false,
@@ -301,6 +301,9 @@ function save() {
 function load() {
   S.gKey    = DB.get('gk', '');
   S.rKey    = DB.get('rk', '');
+  S.adzunaKey = DB.get('ak', '');
+  S.joobleKey = DB.get('jk', '');
+  S.apifyKey  = DB.get('apy', '');
   S.model   = DB.get('mod', 'gemini-2.0-flash-lite');
   S.cv      = DB.get('cv', '');
   S.profile = DB.get('pf', null);
@@ -411,7 +414,7 @@ async function callGemini(contents, temp, maxTok) {
 
 async function gem(prompt, temp, max) { return callGemini([{role:'user', parts:[{text:prompt}]}], temp, max); }
 
-async function geminiChat(userMsg, system, history) {
+async function gemChat(userMsg, system, history) {
   history = history || [];
   var c = [];
   if (system) { c.push({role:'user', parts:[{text:system}]}); c.push({role:'model', parts:[{text:'Understood.'}]}); }
@@ -487,6 +490,115 @@ async function fetchJSearch(q, loc) {
   return (d.data || []).map(function(j) { return Object.assign({id: uid(), source: 'JSearch'}, j); });
 }
 
+async function fetchAdzuna(q, loc) {
+  // Adzuna has a free tier — needs app_id + app_key
+  // For now we use a guest approach with country auto-detection
+  if (!S.adzunaKey) return [];
+  try {
+    // Adzuna format: app_id=1&app_key=KEY (user provides as "appid:appkey")
+    var parts = S.adzunaKey.split(':');
+    var appId = parts[0] || '1';
+    var appKey = parts[1] || S.adzunaKey;
+    var country = (loc||'').toLowerCase().indexOf('uk') > -1 ? 'gb' : 'in';
+    var url = 'https://api.adzuna.com/v1/api/jobs/' + country + '/search/1?app_id=' + appId +
+      '&app_key=' + appKey + '&results_per_page=12&what=' + encodeURIComponent(q) + '&where=' + encodeURIComponent(loc||'');
+    var r = await fetch(url);
+    if (!r.ok) return [];
+    var d = await r.json();
+    return ((d.results)||[]).map(function(j) {
+      return {
+        id: uid(), source: 'Adzuna',
+        job_title: j.title||'', employer_name: (j.company&&j.company.display_name)||'',
+        job_city: j.location&&j.location.display_name ? j.location.display_name.split(',')[0] : loc||'',
+        job_is_remote: (j.title||'').toLowerCase().indexOf('remote') > -1,
+        job_description: (j.description||'').replace(/<[^>]+>/g,'').slice(0,600),
+        job_apply_link: j.redirect_url||'', job_required_skills: []
+      };
+    });
+  } catch(e) { console.log('Adzuna failed:', e.message); return []; }
+}
+
+async function fetchJooble(q, loc) {
+  if (!S.joobleKey) return [];
+  try {
+    // Jooble API uses a simple POST
+    var url = 'https://jooble.org/api/' + S.joobleKey;
+    var r = await fetch(url, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({keywords: q, location: loc||'', page: 1})
+    });
+    if (!r.ok) return [];
+    var d = await r.json();
+    return ((d.jobs)||[]).slice(0,12).map(function(j) {
+      return {
+        id: uid(), source: 'Jooble',
+        job_title: j.title||'', employer_name: j.company||'',
+        job_city: j.location||loc||'',
+        job_is_remote: (j.title||'').toLowerCase().indexOf('remote') > -1,
+        job_description: (j.snippet||j.summary||'').replace(/<[^>]+>/g,'').slice(0,600),
+        job_apply_link: j.link||'', job_required_skills: []
+      };
+    });
+  } catch(e) { console.log('Jooble failed:', e.message); return []; }
+}
+
+async function fetchApify(q, loc) {
+  // Apify LinkedIn Jobs Scraper — free 30 runs/month
+  // Actor: curious_coder/linkedin-jobs-scraper (free, no LinkedIn login needed)
+  if (!S.apifyKey) return [];
+  try {
+    var runUrl = 'https://api.apify.com/v2/acts/curious_coder~linkedin-jobs-scraper/runs';
+    var runBody = {
+      searchTerms: [q],
+      location: loc || '',
+      count: 10,
+      scrapeJobDetails: false
+    };
+    var runRes = await fetch(runUrl + '?token=' + S.apifyKey, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(runBody)
+    });
+    if (!runRes.ok) throw new Error('Apify run failed: ' + runRes.status);
+    var runData = await runRes.json();
+    var runId = runData.data && runData.data.id;
+    if (!runId) return [];
+
+    // Poll for completion (max 30s)
+    var dataset = [];
+    for (var i = 0; i < 10; i++) {
+      await new Promise(function(r) { setTimeout(r, 3000); });
+      var statusRes = await fetch('https://api.apify.com/v2/actor-runs/' + runId + '?token=' + S.apifyKey);
+      var statusData = await statusRes.json();
+      var status = statusData.data && statusData.data.status;
+      if (status === 'SUCCEEDED') {
+        var dsId = statusData.data.defaultDatasetId;
+        var itemsRes = await fetch('https://api.apify.com/v2/datasets/' + dsId + '/items?token=' + S.apifyKey + '&limit=12');
+        dataset = await itemsRes.json();
+        break;
+      }
+      if (status === 'FAILED' || status === 'ABORTED') break;
+    }
+
+    return (Array.isArray(dataset) ? dataset : []).map(function(j) {
+      return {
+        id: uid(), source: 'LinkedIn (Apify)',
+        job_title: j.title || j.jobTitle || '',
+        employer_name: j.company || j.companyName || '',
+        job_city: j.location || loc || '',
+        job_is_remote: (j.workType||'').toLowerCase().indexOf('remote') > -1,
+        job_description: (j.description || j.descriptionText || '').replace(/<[^>]+>/g,'').slice(0,600),
+        job_apply_link: j.url || j.applyUrl || '',
+        job_required_skills: j.skills || []
+      };
+    }).filter(function(j) { return j.job_title; });
+  } catch(e) {
+    console.warn('Apify fetch failed:', e.message);
+    return [];
+  }
+}
+
 async function searchAllJobs(q, loc) {
   var results = [], sources = [];
   // Always try free APIs first
@@ -500,7 +612,31 @@ async function searchAllJobs(q, loc) {
     if (arbJobs.length) { results = results.concat(arbJobs); sources.push('Arbeitnow'); }
   } catch(e) { console.log('Arbeitnow failed:', e.message); }
 
-  // Optional: RapidAPI if user has key
+  // Optional: Adzuna (if user added key)
+  if (S.adzunaKey) {
+    try {
+      var azJobs = await fetchAdzuna(q, loc);
+      if (azJobs.length) { results = results.concat(azJobs); sources.push('Adzuna'); }
+    } catch(e) { console.log('Adzuna failed:', e.message); }
+  }
+
+  // Optional: Jooble (if user added key)
+  if (S.joobleKey) {
+    try {
+      var jbJobs = await fetchJooble(q, loc);
+      if (jbJobs.length) { results = results.concat(jbJobs); sources.push('Jooble'); }
+    } catch(e) { console.log('Jooble failed:', e.message); }
+  }
+
+  // Optional: Apify (scrapes real LinkedIn Jobs pages)
+  if (S.apifyKey) {
+    try {
+      var apJobs = await fetchApify(q, loc);
+      if (apJobs.length) { results = results.concat(apJobs); sources.push('LinkedIn (Apify)'); }
+    } catch(e) { console.log('Apify failed:', e.message); }
+  }
+
+  // Optional: RapidAPI/JSearch if user has key
   if (S.rKey || PROXY) {
     try {
       var jsJobs = await fetchJSearch(q, loc);
@@ -509,20 +645,62 @@ async function searchAllJobs(q, loc) {
   }
 
   S.jobSources = sources;
-  return results.slice(0, 20);
+  return results.slice(0, 22);
 }
 
 async function scoreJobs(raw) {
   if (!raw.length) return [];
+  var p = S.profile;
+  var candCtx = 'Name: ' + (p.name||'Candidate') + '\n' +
+    'Current role: ' + (p.currentRole||'N/A') + '\n' +
+    'Total experience: ' + (p.yearsExp||0) + ' years\n' +
+    'Skills (from CV only): ' + (p.skills||[]).join(', ') + '\n' +
+    'Skill gaps: ' + (p.skillGaps||[]).join(', ') + '\n' +
+    'Target salary: ' + (p.targetSalary||'flexible') + '\n' +
+    'Location pref: ' + (p.location||'any') + ' | Mode: ' + (p.workMode||'any') + '\n' +
+    'Domain/industry: ' + (p.industries||[]).join(', ') + '\n' +
+    'Career goal: ' + (p.careerGoal||'growth') + '\n' +
+    'Target roles: ' + (p.targetRoles||[]).join(', ');
+
   var lines = raw.map(function(j, i) {
-    return '[' + i + '] "' + j.job_title + '" at ' + j.employer_name +
-      (j.job_city ? ', ' + j.job_city : '') +
-      (j.job_is_remote ? ' (Remote)' : '') +
-      '\nRequired: ' + ((j.job_required_skills||[]).slice(0,5).join(', ') || j.job_description.slice(0,150) || 'N/A');
-  }).join('\n---\n');
-  var prompt = 'Score these ' + raw.length + ' jobs for this candidate. Be realistic, never inflate.\n\nCANDIDATE:\nRole: ' + S.profile.currentRole + ' | Exp: ' + S.profile.yearsExp + 'yrs\nSkills: ' + (S.profile.skills||[]).join(', ') + '\nGoal: ' + (S.profile.careerGoal||'Growth') + '\n\nJOBS:\n' + lines + '\n\nReturn ONLY a JSON array, exactly ' + raw.length + ' items, no extra text:\n[{"i":0,"score":82,"matched":["Python","SQL"],"missing":["Kafka"],"tag":"Strong backend fit"}]';
-  var r = await gem(prompt, 0.2, 1800);
-  try { return parseJSON(r); } catch(e) { return []; }
+    var desc = (j.job_description||'').replace(/<[^>]+>/g,'').slice(0, 350);
+    var skills = (j.job_required_skills||[]).slice(0,8).join(', ');
+    return '[' + i + '] TITLE: "' + (j.job_title||'') + '" | CO: ' + (j.employer_name||'') +
+      ' | LOC: ' + ((j.job_city||'') || (j.job_is_remote?'Remote':'N/A')) +
+      (j.job_is_remote?' [Remote]':'') +
+      '\nSKILLS NEEDED: ' + (skills||'not listed') +
+      '\nJD SNIPPET: ' + (desc||'not available');
+  }).join('\n===\n');
+
+  var prompt = 'You are a senior recruiter. Score each job for this candidate on 5 dimensions.\n\n' +
+    'CANDIDATE:\n' + candCtx + '\n\n' +
+    'JOBS:\n' + lines + '\n\n' +
+    'SCORING DIMENSIONS (same methodology as LinkedIn match score):\n' +
+    '• skillsMatch 0-35: % of required skills candidate has (exact + semantic)\n' +
+    '• expMatch 0-25: candidate years vs apparent role seniority (Senior=5+, Mid=2-5, Jr=0-2)\n' +
+    '• roleMatch 0-20: job title alignment with candidate target roles + current trajectory\n' +
+    '• domainMatch 0-15: tech domain / industry alignment\n' +
+    '• locationMatch 0-5: city match or remote preference match\n\n' +
+    'score = total of all 5. Be HONEST. A 2.5yr candidate vs 7yr requirement should score 40-55, not 80+.\n' +
+    'matched: skills candidate ACTUALLY HAS that appear in this JD\n' +
+    'missing: skills in JD not in candidate profile (be specific, not vague)\n\n' +
+    'Return ONLY valid JSON array, exactly ' + raw.length + ' items:\n' +
+    '[{"i":0,"score":62,"matched":["Python","NLP"],"missing":["7yr exp required","Kafka","AWS"],"tag":"Good domain fit, exp gap"}]';
+
+  try {
+    var r = await gem(prompt, 0.1, 2400);
+    return parseJSON(r);
+  } catch(e) {
+    console.warn('scoreJobs failed:', e.message);
+    // Return basic fallback scores so app doesn't crash
+    return raw.map(function(j,i){
+      var mSkills = (p.skills||[]).filter(function(s){
+        return (j.job_description||'').toLowerCase().indexOf(s.toLowerCase()) > -1 ||
+               (j.job_required_skills||[]).some(function(rs){ return rs.toLowerCase().indexOf(s.toLowerCase())>-1; });
+      });
+      return {i:i, score: Math.min(40 + mSkills.length*5, 75), matched: mSkills.slice(0,4), missing:[], tag:'Basic match'};
+    });
+  }
 }
 
 /* ════════════════════════════════════════════════════════════
@@ -532,7 +710,7 @@ function render() {
   var root = document.getElementById('root');
   if (!root) return;
   // Simple clear logic: show setup if no key (and not proxy) OR no profile
-  var needSetup = (!PROXY && !S.gKey) || !S.profile;
+  var needSetup = (!PROXY && !S.gKey) || !S.profile || S.step === 2 || S.step === 3;
   try {
     root.innerHTML = needSetup ? buildSetup() : buildApp();
   } catch(e) {
@@ -625,34 +803,22 @@ function buildSetup() {
     '</div></div>';
   }
 
-  // Step 2: Chat
-  return '<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px">' +
-  '<div style="width:100%;max-width:620px">' +
-    '<div style="text-align:center;margin-bottom:14px">' +
-      '<div class="step-dots">' + dots + '</div>' +
-      '<p style="font-size:13px;color:var(--t2);margin-top:12px">Answer naturally — building your career profile</p>' +
-    '</div>' +
-    '<div class="card" style="overflow:hidden">' +
-      '<div style="padding:14px 20px;background:var(--gl2);border-bottom:1px solid var(--brdx);display:flex;align-items:center;gap:10px">' +
-        '<div class="msg-av" style="width:36px;height:36px;background:linear-gradient(135deg,var(--ps),rgba(124,127,249,.1))">' + IC.logo + '</div>' +
-        '<div><div style="font-weight:700;font-size:15px">JobAI</div><div style="font-size:12px;color:var(--t2)">Career Intelligence</div></div>' +
+  // Step 2: Auto-extracting (loading state)
+  if (st === 2) {
+    return '<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px">' +
+    '<div style="width:100%;max-width:480px;text-align:center">' +
+      '<div class="card" style="padding:48px">' +
+        '<div class="spinner spinner-lg" style="display:block;margin:0 auto 18px"></div>' +
+        '<h3 style="font-size:18px;font-weight:700;margin-bottom:8px">Reading your CV...</h3>' +
+        '<p style="color:var(--t2);font-size:14px;line-height:1.6">AI is extracting your profile — skills, experience, career history.<br>This takes 10–15 seconds.</p>' +
       '</div>' +
-      '<div id="chatbox" class="chat-list" style="padding:18px;min-height:340px;max-height:440px;overflow-y:auto">' +
-        S.chat.map(function(m) {
-          return '<div class="msg ' + m.r + '" style="display:flex;gap:9px;' + (m.r==='u'?'align-self:flex-end;flex-direction:row-reverse':'') + '">' +
-            '<div class="msg-av">' + (m.r==='ai'?IC.logo:IC.user) + '</div>' +
-            '<div class="bub">' + mdown(esc(m.t)) + '</div>' +
-          '</div>';
-        }).join('') +
-        (S.busy ? '<div class="msg ai" style="display:flex;gap:9px"><div class="msg-av">' + IC.logo + '</div><div class="bub"><span class="dot-anim"><span></span><span></span><span></span></span></div></div>' : '') +
-      '</div>' +
-      '<div style="padding:12px 18px;border-top:1px solid var(--brdx);background:var(--gl2);display:flex;gap:10px">' +
-        '<input class="inp" id="chat-in" placeholder="Type your answer, press Enter..." style="flex:1" ' + (S.busy?'disabled':'') + '>' +
-        '<button class="btn btn-primary" id="chat-send" ' + (S.busy?'disabled':'') + '>' + (S.busy?'<span class="spinner"></span>':IC.send) + '</button>' +
-      '</div>' +
-    '</div>' +
-  '</div></div>';
+    '</div></div>';
+  }
+
+  // Step 3: Profile review + edit form
+  return buildProfileForm();
 }
+
 
 /* ════════════════════════════════════════════════════════════
    MAIN APP SHELL
@@ -892,7 +1058,9 @@ function tTracker() {
   return '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">' +
     '<div><div style="font-size:18px;font-weight:800">Application Tracker</div><div style="font-size:13px;color:var(--t2)">' + S.apps.length + ' applications</div></div>' +
     '<div style="display:flex;gap:7px;flex-wrap:wrap">' +
-      '<button class="btn btn-ghost btn-sm" onclick="exportCSV()">' + IC.export + ' Export CSV</button>' +
+      '<button class="btn btn-ghost btn-sm" onclick="exportCSV()">' + IC.export + ' CSV</button>' +
+      '<button class="btn btn-ghost btn-sm" onclick="exportAllData()">' + IC.download + ' Save data</button>' +
+      '<button class="btn btn-ghost btn-sm" onclick="importData()">' + IC.upload + ' Restore</button>' +
       '<button class="btn btn-primary btn-sm" id="add2-btn">' + IC.plus + ' Add Application</button>' +
     '</div>' +
   '</div>' +
@@ -1082,11 +1250,33 @@ function openSettings() {
       '<input class="inp' + (S.rKey?' valid':'') + '" id="cfg-rk" type="password" placeholder="Paste RapidAPI key..." value="' + esc(S.rKey) + '">' +
       '<div style="font-size:11px;margin-top:4px;color:' + (S.rKey?'var(--g)':'var(--t3)') + '">' + (S.rKey ? IC.check + ' Live LinkedIn/Indeed search enabled' : 'Without this, free Remotive + Arbeitnow search still works') + '</div>' +
     '</div>' +
+    '<div style="height:1px;background:var(--brdx);margin:14px 0"></div>' +
+    '<div style="margin-bottom:12px">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">' +
+        '<label style="font-size:13px;font-weight:600">Adzuna API Key <span style="color:var(--t3);font-weight:400">optional, free 250/mo</span></label>' +
+        '<a href="https://developer.adzuna.com/" target="_blank" style="font-size:12px;color:var(--p);text-decoration:none">Get key →</a>' +
+      '</div>' +
+      '<input class="inp' + (S.adzunaKey?' valid':'') + '" id="cfg-ak" type="password" placeholder="Adzuna API key..." value="' + esc(S.adzunaKey||'') + '">' +
+    '</div>' +
+    '<div style="margin-bottom:14px">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">' +
+        '<label style="font-size:13px;font-weight:600">Jooble API Key <span style="color:var(--t3);font-weight:400">optional, free</span></label>' +
+        '<a href="https://jooble.org/api/about" target="_blank" style="font-size:12px;color:var(--p);text-decoration:none">Get key →</a>' +
+      '</div>' +
+      '<input class="inp' + (S.joobleKey?' valid':'') + '" id="cfg-jk" type="password" placeholder="Jooble API key..." value="' + esc(S.joobleKey||'') + '">' +
+    '</div>' +
+    '<div style="margin-bottom:14px">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">' +
+        '<label style="font-size:13px;font-weight:600">Apify API Token <span style="color:var(--t3);font-weight:400">optional · scrapes LinkedIn/Indeed</span></label>' +
+        '<a href="https://console.apify.com/account/integrations" target="_blank" style="font-size:12px;color:var(--p);text-decoration:none">Get free token →</a>' +
+      '</div>' +
+      '<input class="inp' + (S.apifyKey?' valid':'') + '" id="cfg-apy" type="password" placeholder="apify_api_..." value="' + esc(S.apifyKey||'') + '">' +
+      '<div style="font-size:11px;margin-top:4px;color:' + (S.apifyKey?'var(--g)':'var(--t3)') + '">' + (S.apifyKey?'✓ Apify scraping enabled':'Free tier: 30 actor runs/mo. Scrapes real LinkedIn Jobs pages.') + '</div>' +
+    '</div>' +
     '<div class="al al-p" style="font-size:12px;margin-bottom:18px">' +
-      '<strong>How to get RapidAPI key:</strong><br>' +
-      '1. Go to rapidapi.com → search "JSearch"<br>' +
-      '2. Click Subscribe → Basic (Free)<br>' +
-      '3. Go to Endpoints → copy X-RapidAPI-Key value' +
+      '<strong>RapidAPI (JSearch) free key:</strong><br>' +
+      '1. rapidapi.com → search "JSearch" → Subscribe → Basic (Free)<br>' +
+      '2. Go to Endpoints tab → copy X-RapidAPI-Key value' +
     '</div>' +
     '<div style="display:flex;gap:10px">' +
       '<button class="btn btn-ghost" onclick="closeModal()">Cancel</button>' +
@@ -1097,53 +1287,237 @@ function openSettings() {
 function saveSettings() {
   var gk = (document.getElementById('cfg-gk')||{}).value;
   var rk = (document.getElementById('cfg-rk')||{}).value;
+  var ak = (document.getElementById('cfg-ak')||{}).value;
+  var jk = (document.getElementById('cfg-jk')||{}).value;
   if (gk !== undefined) S.gKey = gk.trim();
   if (rk !== undefined) S.rKey = rk.trim();
+  if (ak !== undefined) S.adzunaKey = ak.trim();
+  var apk = (document.getElementById('cfg-apy')||{}).value;
+  if (jk !== undefined) S.joobleKey = jk.trim();
+  if (apk !== undefined) S.apifyKey = apk.trim();
+  // Persist additional keys
+  DB.set('ak', S.adzunaKey||'');
+  DB.set('jk', S.joobleKey||'');
+  DB.set('apy', S.apifyKey||'');
   save(); closeModal(); render();
 }
 
 /* ════════════════════════════════════════════════════════════
-   CHAT — Profile build
+   PROFILE BUILD — Auto-extract then visual review form
+   No hardcoded questions. AI extracts everything from CV.
+   User reviews/edits in a clean form with sliders + toggles.
    ════════════════════════════════════════════════════════════ */
-async function startChat() {
-  S.busy = true; render();
-  var sys = 'You are JobAI, a sharp career analyst. A candidate shared their CV.\n\nDO:\n1. ONE specific observation about their real background (mention something concrete). Max 2 sentences.\n2. Ask exactly 5 numbered questions:\n   1) Career goal and any pivot plans\n   2) Target salary range (use LPA for India)\n   3) Location + remote/hybrid/on-site preference\n   4) Company size preference (startup/mid-size/MNC)\n   5) Biggest achievement not fully captured in CV\n\nBe warm, direct, specific.\n\nCV:\n' + S.cv;
+
+// Step 2: AI auto-extracts profile from CV
+async function autoExtractProfile() {
+  S.busy = true; S.step = 2; render();
+  var prompt = 'Extract a complete professional profile from this CV. Return ONLY valid JSON, no markdown.\n\n' +
+    'STRICT RULES:\n' +
+    '- yearsExp: Sum ALL employment periods from dates in CV. Calculate precisely.\n' +
+    '- skills: ONLY skills explicitly mentioned. No invention.\n' +
+    '- careerGaps: List gaps > 3 months as ["X months gap between [Company A end] and [Company B start]"]\n' +
+    '- Do NOT hallucinate any projects, companies, or skills not in CV\n\n' +
+    'CV:\n' + S.cv + '\n\n' +
+    'Return JSON matching this schema exactly:\n' +
+    '{"name":"","email":"","phone":"","currentRole":"","currentCompany":"","yearsExp":0,' +
+    '"employmentHistory":[{"role":"","company":"","from":"MMM YYYY","to":"MMM YYYY or Present"}],' +
+    '"careerGaps":[],"education":"","certifications":[],' +
+    '"skills":[],"skillLevels":{"Python":"advanced"},"skillGaps":[],' +
+    '"targetRoles":["R1","R2","R3","R4"],"industries":[],' +
+    '"summary":"2-3 sentence professional USP",' +
+    '"location":"","targetSalary":"","workMode":"Hybrid",' +
+    '"preferredCompany":"","careerGoal":""}';
+
   try {
-    var r = await geminiChat('Please analyze my CV.', sys, []);
-    S.chat.push({r:'ai', t:r});
+    var r = await gem(prompt, 0.1, 2048);
+    var extracted = parseJSON(r);
+    // Merge extracted with any user preferences already set
+    S.profile = Object.assign({
+      location:'', targetSalary:'', workMode:'Hybrid',
+      preferredCompany:'', careerGoal:''
+    }, extracted);
+    S.step = 3; // Go to review form
   } catch(e) {
-    S.chat.push({r:'ai', t:'Error: ' + e.message + '\n\nCheck your Gemini API key in Settings and try again.'});
+    // If extraction fails, still go to form with empty profile
+    S.profile = {name:'', currentRole:'', yearsExp:0, skills:[], skillGaps:[], targetRoles:[], summary:'', location:'', targetSalary:'', workMode:'Hybrid', careerGoal:''};
+    S.step = 3;
+    console.warn('Auto-extract failed:', e.message);
   }
   S.busy = false; save(); render();
 }
 
-async function sendChat() {
-  var inp = document.getElementById('chat-in');
-  var t = inp && inp.value.trim();
-  if (!t || S.busy) return;
-  S.chat.push({r:'u', t:t});
-  if (inp) inp.value = '';
-  S.busy = true; render();
+// Step 3 HTML: Visual review + edit form
+function buildProfileForm() {
+  var p = S.profile || {};
+  var workModes = ['Remote','Hybrid','On-site'];
+  var companySizes = ['Any','Early startup (<50)','Series B startup','Mid-size (200-2000)','Large MNC (2000+)','Product company'];
+  var dots = [0,1,2,3].map(function(i) {
+    return '<div class="step-dot on" style="width:' + (i===3?24:7) + 'px;opacity:' + (i<=3?1:0.3) + '"></div>';
+  }).join('');
 
-  var sys = 'You are JobAI. Build a career profile from conversation.\nCV:\n' + S.cv + '\n\nAfter user answers 5 questions:\n1. 2-sentence warm acknowledgment\n2. Output profile JSON between <PROFILE> and </PROFILE>\n3. Last line exactly: PROFILE_READY\n\nCRITICAL:\n- yearsExp: Calculate precisely from dates in CV (sum all employment periods)\n- careerGaps: List gaps > 3 months between roles\n- skills: ONLY what is explicitly in CV, no invention\n- skillGaps: Based on their stated goal vs current skills\n\nJSON:\n{"name":"","currentRole":"","currentCompany":"","yearsExp":4.5,"employmentHistory":[{"role":"","company":"","from":"2021-01","to":"2024-03"}],"careerGaps":["8-month gap 2021"],"location":"","targetSalary":"₹18-24 LPA","workMode":"Hybrid","skills":["s1","s2"],"skillLevels":{"Python":"advanced"},"skillGaps":["g1"],"education":"","certifications":[],"targetRoles":["R1","R2","R3","R4"],"industries":["i1"],"summary":"2-3 sentence USP summary","preferredCompany":"startup","careerGoal":"one sentence","achievement":""}';
+  var skillsHtml = (p.skills||[]).map(function(s) {
+    return '<span style="display:inline-flex;align-items:center;gap:4px;background:var(--gs);color:#059669;padding:4px 10px;border-radius:50px;font-size:13px;font-weight:500;margin:3px">' +
+      s + '<button onclick="removeSkill(\'' + s.replace(/'/g,"\'") + '\')" style="background:none;border:none;cursor:pointer;color:#059669;font-size:14px;line-height:1;padding:0 0 0 2px">×</button></span>';
+  }).join('');
 
-  try {
-    var r = await geminiChat(t, sys, S.chat.slice(0,-1));
-    var pm = r.match(/<PROFILE>([\s\S]*?)<\/PROFILE>/);
-    if (pm) {
-      try {
-        S.profile = JSON.parse(pm[1].trim());
-        S.chat.push({r:'ai', t: r.replace(/<PROFILE>[\s\S]*?<\/PROFILE>/, '').replace('PROFILE_READY','').trim()});
-        S.busy = false; save(); render();
-        await new Promise(function(res) { setTimeout(res, 2000); });
-        S.tab = 'dash'; render(); return;
-      } catch(pe) { console.warn('Profile parse fail:', pe); }
-    }
-    S.chat.push({r:'ai', t:r});
-  } catch(e) {
-    S.chat.push({r:'ai', t:'Error: ' + e.message});
-  }
-  S.busy = false; save(); render();
+  var targetRolesHtml = (p.targetRoles||[]).map(function(r) {
+    return '<span style="display:inline-flex;align-items:center;gap:4px;background:var(--ps);color:var(--p);padding:4px 10px;border-radius:50px;font-size:13px;font-weight:500;margin:3px">' +
+      r + '<button onclick="removeRole(\'' + r.replace(/'/g,"\'") + '\')" style="background:none;border:none;cursor:pointer;color:var(--p);font-size:14px;line-height:1;padding:0 0 0 2px">×</button></span>';
+  }).join('');
+
+  return '<div style="min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:24px">' +
+  '<div style="width:100%;max-width:680px">' +
+    '<div style="text-align:center;margin-bottom:24px">' +
+      '<div class="step-dots">' + dots + '</div>' +
+      '<h2 style="font-size:22px;font-weight:800;margin-top:14px;margin-bottom:5px">Review your profile</h2>' +
+      '<p style="color:var(--t2);font-size:14px">AI extracted this from your CV — edit anything that looks wrong</p>' +
+    '</div>' +
+    '<div class="card" style="padding:28px">' +
+
+      // ── Basic Info
+      '<div style="font-size:13px;font-weight:700;color:var(--p);text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px">Basic Info</div>' +
+      '<div class="g2" style="margin-bottom:14px">' +
+        '<div><label style="font-size:12px;font-weight:600;color:var(--t2);display:block;margin-bottom:5px">Full name</label>' +
+        '<input class="inp" id="pf-name" value="' + esc(p.name||'') + '" placeholder="Your full name"></div>' +
+        '<div><label style="font-size:12px;font-weight:600;color:var(--t2);display:block;margin-bottom:5px">Current / last role</label>' +
+        '<input class="inp" id="pf-role" value="' + esc(p.currentRole||'') + '" placeholder="e.g. Senior Data Scientist"></div>' +
+        '<div><label style="font-size:12px;font-weight:600;color:var(--t2);display:block;margin-bottom:5px">Current / last company</label>' +
+        '<input class="inp" id="pf-co" value="' + esc(p.currentCompany||'') + '" placeholder="Company name"></div>' +
+        '<div><label style="font-size:12px;font-weight:600;color:var(--t2);display:block;margin-bottom:5px">Total experience (years)</label>' +
+        '<input class="inp" id="pf-exp" type="number" step="0.5" min="0" max="50" value="' + (p.yearsExp||0) + '"></div>' +
+      '</div>' +
+
+      // ── Location & Preferences
+      '<div style="height:1px;background:var(--brdx);margin:18px 0"></div>' +
+      '<div style="font-size:13px;font-weight:700;color:var(--p);text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px">Preferences</div>' +
+      '<div class="g2" style="margin-bottom:14px">' +
+        '<div><label style="font-size:12px;font-weight:600;color:var(--t2);display:block;margin-bottom:5px">City / location</label>' +
+        '<input class="inp" id="pf-loc" value="' + esc(p.location||'') + '" placeholder="e.g. Bengaluru, India"></div>' +
+        '<div><label style="font-size:12px;font-weight:600;color:var(--t2);display:block;margin-bottom:5px">Target salary</label>' +
+        '<input class="inp" id="pf-sal" value="' + esc(p.targetSalary||'') + '" placeholder="e.g. ₹18-24 LPA"></div>' +
+      '</div>' +
+      '<div style="margin-bottom:14px"><label style="font-size:12px;font-weight:600;color:var(--t2);display:block;margin-bottom:8px">Work mode preference</label>' +
+        '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
+          workModes.map(function(m) {
+            return '<label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:8px 16px;background:var(--gl);border:1.5px solid ' + (p.workMode===m?'var(--p)':'var(--brdx)') + ';border-radius:50px;font-size:13px;font-weight:500;transition:.15s">' +
+              '<input type="radio" name="workmode" value="' + m + '" ' + (p.workMode===m?'checked':'') + ' style="accent-color:var(--p)">' + m + '</label>';
+          }).join('') +
+        '</div>' +
+      '</div>' +
+      '<div style="margin-bottom:14px"><label style="font-size:12px;font-weight:600;color:var(--t2);display:block;margin-bottom:5px">Preferred company size</label>' +
+        '<select class="inp sel" id="pf-cosize">' +
+          companySizes.map(function(s) { return '<option value="' + s + '" ' + (p.preferredCompany===s?'selected':'') + '>' + s + '</option>'; }).join('') +
+        '</select>' +
+      '</div>' +
+
+      // ── Skills
+      '<div style="height:1px;background:var(--brdx);margin:18px 0"></div>' +
+      '<div style="font-size:13px;font-weight:700;color:var(--p);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Skills (from CV)</div>' +
+      '<div id="skills-container" style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px;min-height:36px;padding:8px;background:rgba(255,255,255,.5);border:1.5px solid var(--brdx);border-radius:14px">' +
+        (skillsHtml || '<span style="font-size:13px;color:var(--t3)">No skills extracted — type below to add</span>') +
+      '</div>' +
+      '<div style="display:flex;gap:8px">' +
+        '<input class="inp" id="skill-add" placeholder="Add a skill..." style="flex:1">' +
+        '<button class="btn btn-ghost btn-sm" onclick="addSkill()">+ Add</button>' +
+      '</div>' +
+
+      // ── Target Roles
+      '<div style="height:1px;background:var(--brdx);margin:18px 0"></div>' +
+      '<div style="font-size:13px;font-weight:700;color:var(--p);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Target roles</div>' +
+      '<div id="roles-container" style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px;min-height:36px;padding:8px;background:rgba(255,255,255,.5);border:1.5px solid var(--brdx);border-radius:14px">' +
+        (targetRolesHtml || '<span style="font-size:13px;color:var(--t3)">No roles extracted — add below</span>') +
+      '</div>' +
+      '<div style="display:flex;gap:8px">' +
+        '<input class="inp" id="role-add" placeholder="Add a target role..." style="flex:1">' +
+        '<button class="btn btn-ghost btn-sm" onclick="addRole()">+ Add</button>' +
+      '</div>' +
+
+      // ── Career Goal
+      '<div style="height:1px;background:var(--brdx);margin:18px 0"></div>' +
+      '<div style="font-size:13px;font-weight:700;color:var(--p);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Career Goal</div>' +
+      '<input class="inp" id="pf-goal" value="' + esc(p.careerGoal||'') + '" placeholder="e.g. To lead AI product teams at a Series B company">' +
+
+      // ── Summary (auto-generated, editable)
+      '<div style="height:1px;background:var(--brdx);margin:18px 0"></div>' +
+      '<div style="font-size:13px;font-weight:700;color:var(--p);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Professional Summary</div>' +
+      '<textarea class="inp ta" id="pf-summary" style="min-height:80px">' + esc(p.summary||'') + '</textarea>' +
+
+      // ── Actions
+      '<div style="display:flex;gap:10px;margin-top:24px">' +
+        '<button class="btn btn-ghost" id="pf-back">← Back</button>' +
+        '<button class="btn btn-primary" id="pf-save" style="flex:1;justify-content:center">Save &amp; Go to Dashboard →</button>' +
+      '</div>' +
+    '</div>' +
+  '</div></div>';
+}
+
+function addSkill() {
+  var inp = document.getElementById('skill-add');
+  var v = inp && inp.value.trim();
+  if (!v || !S.profile) return;
+  if (!S.profile.skills) S.profile.skills = [];
+  if (S.profile.skills.indexOf(v) === -1) { S.profile.skills.push(v); save(); }
+  inp.value = '';
+  // Re-render just the skills container
+  var c = document.getElementById('skills-container');
+  if (c) c.innerHTML = S.profile.skills.map(function(s) {
+    return '<span style="display:inline-flex;align-items:center;gap:4px;background:var(--gs);color:#059669;padding:4px 10px;border-radius:50px;font-size:13px;font-weight:500;margin:3px">' +
+      esc(s) + '<button onclick="removeSkill(\'' + s.replace(/'/g,"\'") + '\')" style="background:none;border:none;cursor:pointer;color:#059669;font-size:14px;line-height:1;padding:0 0 0 2px">×</button></span>';
+  }).join('');
+}
+
+function removeSkill(s) {
+  if (!S.profile) return;
+  S.profile.skills = (S.profile.skills||[]).filter(function(x){ return x!==s; });
+  save();
+  var c = document.getElementById('skills-container');
+  if (c) c.innerHTML = S.profile.skills.map(function(sk) {
+    return '<span style="display:inline-flex;align-items:center;gap:4px;background:var(--gs);color:#059669;padding:4px 10px;border-radius:50px;font-size:13px;font-weight:500;margin:3px">' +
+      esc(sk) + '<button onclick="removeSkill(\'' + sk.replace(/'/g,"\'") + '\')" style="background:none;border:none;cursor:pointer;color:#059669;font-size:14px;line-height:1;padding:0 0 0 2px">×</button></span>';
+  }).join('');
+}
+
+function addRole() {
+  var inp = document.getElementById('role-add');
+  var v = inp && inp.value.trim();
+  if (!v || !S.profile) return;
+  if (!S.profile.targetRoles) S.profile.targetRoles = [];
+  if (S.profile.targetRoles.indexOf(v) === -1) { S.profile.targetRoles.push(v); save(); }
+  inp.value = '';
+  var c = document.getElementById('roles-container');
+  if (c) c.innerHTML = S.profile.targetRoles.map(function(r) {
+    return '<span style="display:inline-flex;align-items:center;gap:4px;background:var(--ps);color:var(--p);padding:4px 10px;border-radius:50px;font-size:13px;font-weight:500;margin:3px">' +
+      esc(r) + '<button onclick="removeRole(\'' + r.replace(/'/g,"\'") + '\')" style="background:none;border:none;cursor:pointer;color:var(--p);font-size:14px;line-height:1;padding:0 0 0 2px">×</button></span>';
+  }).join('');
+}
+
+function removeRole(r) {
+  if (!S.profile) return;
+  S.profile.targetRoles = (S.profile.targetRoles||[]).filter(function(x){ return x!==r; });
+  save();
+  var c = document.getElementById('roles-container');
+  if (c) c.innerHTML = S.profile.targetRoles.map(function(ro) {
+    return '<span style="display:inline-flex;align-items:center;gap:4px;background:var(--ps);color:var(--p);padding:4px 10px;border-radius:50px;font-size:13px;font-weight:500;margin:3px">' +
+      esc(ro) + '<button onclick="removeRole(\'' + ro.replace(/'/g,"\'") + '\')" style="background:none;border:none;cursor:pointer;color:var(--p);font-size:14px;line-height:1;padding:0 0 0 2px">×</button></span>';
+  }).join('');
+}
+
+function saveProfileForm() {
+  if (!S.profile) S.profile = {};
+  S.profile.name        = ((document.getElementById('pf-name')||{}).value||'').trim();
+  S.profile.currentRole = ((document.getElementById('pf-role')||{}).value||'').trim();
+  S.profile.currentCompany = ((document.getElementById('pf-co')||{}).value||'').trim();
+  S.profile.yearsExp    = parseFloat(((document.getElementById('pf-exp')||{}).value)||0)||0;
+  S.profile.location    = ((document.getElementById('pf-loc')||{}).value||'').trim();
+  S.profile.targetSalary= ((document.getElementById('pf-sal')||{}).value||'').trim();
+  S.profile.careerGoal  = ((document.getElementById('pf-goal')||{}).value||'').trim();
+  S.profile.summary     = ((document.getElementById('pf-summary')||{}).value||'').trim();
+  S.profile.preferredCompany = ((document.getElementById('pf-cosize')||{}).value||'').trim();
+  var wm = document.querySelector('input[name="workmode"]:checked');
+  if (wm) S.profile.workMode = wm.value;
+  save();
+  S.tab = 'dash'; S.step = 99;
+  render();
 }
 
 /* ════════════════════════════════════════════════════════════
@@ -1321,10 +1695,48 @@ async function genResume() {
   S.busy = true; S.resumeOut = null; render();
   try {
     var p = S.profile;
-    var prompt = 'Create a professional resume for this candidate. Return ONLY valid JSON with "html" and "latex" fields.\n\nCANDIDATE:\n' + JSON.stringify(p) + '\n\nTARGET: ' + (jdCtx||'General professional resume') + '\n\nHTML requirements:\n- ATS-friendly, single column, inline styles only\n- Sections: Header (name, contact, links), Summary, Experience (with bullets), Skills, Education, Certifications\n- Each job: role, company, date range, 3-4 achievement bullets\n- Prioritise skills matching target role\n- Clean, readable font-family: Arial,sans-serif\n\nLaTeX requirements:\n- Use \\documentclass[10pt,a4paper]{article} with geometry, enumitem, titlesec, hyperref\n- Standard professional CV sections\n- Should compile in Overleaf without extra packages\n\nReturn: {"html":"complete HTML string","latex":"complete LaTeX string"}';
+    // Use XML delimiters — NOT JSON — because HTML/LaTeX contain chars that break JSON.parse
+    var prompt = 'Create a professional resume. Use ONLY facts from the profile. Do NOT invent anything.\n\n' +
+      'PROFILE:\n' + JSON.stringify({
+        name: p.name, role: p.currentRole, company: p.currentCompany,
+        years: p.yearsExp, skills: p.skills, education: p.education,
+        certifications: p.certifications, summary: p.summary,
+        history: p.employmentHistory, goal: p.careerGoal,
+        achievements: p.achievement, targetRoles: p.targetRoles,
+        location: p.location, contact: p.contact || ''
+      }) + '\n\nTARGET: ' + (jdCtx||'General professional resume') + '\n\n' +
+      'OUTPUT FORMAT: Use these exact delimiters, output content directly between them:\n\n' +
+      '<HTML_RESUME>\n' +
+      '[Write complete ATS-friendly HTML resume here. Use inline styles only. font-family: Georgia,serif. ' +
+      'Sections: header with name+contact, summary, experience with date ranges and 3-4 bullet achievements each, skills, education, certifications. ' +
+      'NO external CSS. NO classes. All styling inline.]\n' +
+      '</HTML_RESUME>\n\n' +
+      '<LATEX_RESUME>\n' +
+      '[Write complete LaTeX resume here. Use \\documentclass[10pt,a4paper]{article} with geometry,titlesec,enumitem,hyperref packages. ' +
+      'All standard sections. Should compile directly in Overleaf.]\n' +
+      '</LATEX_RESUME>';
+
     var r = await gem(prompt, 0.3, 4096);
-    var parsed = parseJSON(r);
-    S.resumeOut = {html: parsed.html||'<p>HTML not generated</p>', latex: parsed.latex||'% LaTeX not generated'};
+
+    // Extract with regex — immune to JSON escape issues
+    var htmlMatch = r.match(/<HTML_RESUME>([\s\S]*?)<\/HTML_RESUME>/);
+    var latexMatch = r.match(/<LATEX_RESUME>([\s\S]*?)<\/LATEX_RESUME>/);
+
+    if (!htmlMatch && !latexMatch) {
+      // Fallback: try parseJSON if model ignored instructions
+      try {
+        var parsed = parseJSON(r);
+        S.resumeOut = {html: parsed.html||'<p>Not generated</p>', latex: parsed.latex||''};
+      } catch(je) {
+        // Last resort: treat whole response as HTML
+        S.resumeOut = {html: r, latex: ''};
+      }
+    } else {
+      S.resumeOut = {
+        html: htmlMatch ? htmlMatch[1].trim() : '<p>HTML section not found in response</p>',
+        latex: latexMatch ? latexMatch[1].trim() : '% LaTeX section not found in response'
+      };
+    }
   } catch(e) { alert('Resume generation failed: ' + e.message); }
   S.busy = false; render();
 }
@@ -1432,6 +1844,44 @@ function exportCSV() {
   dlBlob(rows.join('\n'), 'JobAI_Applications.csv', 'text/csv');
 }
 
+// Export all app data as a JSON file (like a save file)
+function exportAllData() {
+  var data = {
+    version: 3,
+    exported: new Date().toISOString(),
+    profile: S.profile,
+    cv: S.cv,
+    apps: S.apps,
+    gKey: '', // never export keys for security
+    rKey: ''
+  };
+  dlBlob(JSON.stringify(data, null, 2), 'JobAI_Data_' + new Date().toISOString().slice(0,10) + '.json', 'application/json');
+}
+
+// Import data from a JSON file
+function importData() {
+  var inp = document.createElement('input');
+  inp.type = 'file'; inp.accept = '.json';
+  inp.onchange = function(e) {
+    var f = e.target.files[0]; if (!f) return;
+    var r = new FileReader();
+    r.onload = function(ev) {
+      try {
+        var data = JSON.parse(ev.target.result);
+        if (data.profile) S.profile = data.profile;
+        if (data.cv) S.cv = data.cv;
+        if (data.apps) S.apps = data.apps;
+        save();
+        alert('Data imported successfully! ' + (data.apps||[]).length + ' applications, profile loaded.');
+        render();
+      } catch(err) { alert('Import failed: ' + err.message); }
+    };
+    r.readAsText(f);
+  };
+  inp.click();
+}
+
+
 function triggerFollowup(id) {
   var a = S.apps.find(function(x) { return x.id===id; });
   if (!a) return;
@@ -1522,7 +1972,7 @@ function attachEvents() {
     var t = ((document.getElementById('cv-ta')||{}).value||'').trim();
     if (!t || t.length < 50) { alert('Please paste or upload your CV'); return; }
     S.cv = t; S.step = 2; S.chat = []; save(); render();
-    setTimeout(startChat, 80);
+    setTimeout(autoExtractProfile, 80);
   });
 
   // ── Step 2: Chat
@@ -1542,6 +1992,16 @@ function attachEvents() {
     Object.assign(S, {gKey:'', rKey:'', profile:null, chat:[], apps:[], jobs:[], cv:'', step:0, busy:false, jd:null, drafts:{}, draftCtx:{}, lastQ:'', lastL:'Bengaluru', resumeOut:null});
     render();
   });
+
+  // ── Hunt
+  // ── Profile form (step 3)
+  on('pf-save', saveProfileForm);
+  on('pf-back', function() { S.step=1; render(); });
+  // Attach Enter key on skill/role add inputs (safe - no string quoting issue)
+  var skillInp = document.getElementById('skill-add');
+  if (skillInp) skillInp.onkeydown = function(e) { if (e.key === 'Enter') { e.preventDefault(); addSkill(); } };
+  var roleInp = document.getElementById('role-add');
+  if (roleInp) roleInp.onkeydown = function(e) { if (e.key === 'Enter') { e.preventDefault(); addRole(); } };
 
   // ── Hunt
   on('hunt-btn', doHunt);
